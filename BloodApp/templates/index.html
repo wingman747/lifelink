@@ -1,0 +1,375 @@
+{% load static %}
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>LifeLink</title>
+<meta name="keywords" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #f5f6fa 0%, #ebedf5 50%, #f5eded 100%);
+  min-height: 100vh;
+  color: #1a1f36;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.3;
+  background-image: radial-gradient(hsl(220 20% 80% / 0.4) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* Ambient glow */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: rgba(220, 38, 38, 0.05);
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Navbar ── */
+#header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 1px solid #e5e7eb;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+#logo h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: #1a1f36;
+}
+
+#logo h1::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background: #dc2626;
+  border-radius: 50%;
+  animation: pulseRed 2s infinite;
+}
+
+@keyframes pulseRed {
+  0% { box-shadow: 0 0 0 0 rgba(220,38,38,0.3); }
+  70% { box-shadow: 0 0 0 12px rgba(220,38,38,0); }
+  100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+}
+
+#menu ul {
+  list-style: none;
+  display: flex;
+  gap: 32px;
+}
+
+#menu ul li a {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  transition: color 0.2s;
+  letter-spacing: 0.02em;
+}
+
+#menu ul li a:hover,
+#menu ul li.current_page_item a {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* ── Wrapper ── */
+#wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 16px 60px;
+}
+
+/* ── Page Header ── */
+.page-header {
+  text-align: center;
+  margin-bottom: 40px;
+  animation: fadeUp 0.6s ease-out 0.1s both;
+}
+
+.page-header .tag {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: #dc2626;
+  margin-bottom: 16px;
+}
+
+.page-header h2 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: #1a1f36;
+  margin-bottom: 8px;
+}
+
+.page-header p {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Glass Card ── */
+.glass-card {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px -4px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 32px;
+  animation: fadeUp 0.6s ease-out 0.2s both;
+}
+
+.glass-card .gradient-line {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #dc2626, transparent);
+}
+
+/* ── Session Banner ── */
+.session-banner {
+  padding: 24px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* ── Data message ── */
+.data-message {
+  padding: 16px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: #1a1f36;
+}
+
+/* ── Table ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-header h3 {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #6b7280;
+}
+
+.data-table thead tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.data-table th {
+  padding: 16px 24px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+}
+
+.data-table td {
+  padding: 16px 24px;
+  font-size: 14px;
+  color: #1a1f36;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  background: transparent;
+}
+
+.data-table tr:hover td {
+  background: rgba(0,0,0,0.02);
+}
+
+.data-table td:nth-child(even),
+.data-table th:nth-child(even) {
+  background: transparent;
+}
+
+/* ── Chart image ── */
+.chart-section {
+  padding: 32px;
+  animation: fadeUp 0.6s ease-out 0.4s both;
+}
+
+.chart-section h3 {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.chart-section img {
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+/* ── Footer ── */
+.status-footer {
+  margin-top: 48px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #6b7280;
+  animation: fadeUp 0.6s ease-out 0.6s both;
+}
+
+.status-footer .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div id="header">
+  <div id="logo">
+    <h1>LifeLink</h1>
+  </div>
+  <div id="menu">
+    <ul id="main">
+      <li><a href="{% url 'index' %}">Home</a></li>
+      <li><a href="{% url 'HospitalLogin' %}">Hospital</a></li>
+      <li class="current_page_item"><a href="{% url 'BankLogin' %}">Blood Bank</a></li>
+      <li><a href="{% url 'DonorLogin' %}">Donor</a></li>
+      <li><a href="{% url 'PatientLogin' %}">Patient</a></li>
+    </ul>
+  </div>
+</div>
+
+<div id="wrapper">
+  <div id="page">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="tag">Blood Bank Dashboard</div>
+      <h2>Inventory Overview</h2>
+      <p>Real-time blood supply data and analytics</p>
+    </div>
+
+    <!-- Session Banner -->
+    <div class="glass-card">
+      <div class="gradient-line"></div>
+      <div class="session-banner">
+        Blood Bank Operator — Session Active
+      </div>
+    </div>
+
+    <!-- Data Message from Django -->
+    {% if data %}
+    <div class="glass-card">
+      <div class="gradient-line"></div>
+      <div class="data-message">{{ data|safe }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Data Table -->
+    <div class="glass-card">
+      <div class="gradient-line"></div>
+      <div class="table-header">
+        <h3>Blood Stock Levels</h3>
+      </div>
+      <div style="overflow-x:auto;">
+        {{ data|safe }}
+      </div>
+    </div>
+
+    <!-- Chart Image -->
+    {% if img %}
+    <div class="glass-card">
+      <div class="gradient-line"></div>
+      <div class="chart-section">
+        <h3>Supply Analytics</h3>
+        <img src="data:image/png;base64, {{ img }}" alt="Blood Supply Chart" />
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="status-footer">
+      <div><span class="dot"></span>System Operational</div>
+      <div>Encrypted Connection</div>
+      <div>v2.4.0-Stable</div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

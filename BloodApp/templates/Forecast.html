@@ -1,0 +1,147 @@
+{% load static %}
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>LifeLink</title>
+<meta name="keywords" content="" />
+<meta name="Premium Series" content="" />
+<link href="{% static 'default.css' %}" rel="stylesheet" type="text/css" media="screen" />
+<script language="javascript">
+
+	function validate(formObj)
+	{
+	if(formObj.t2.value.length==0)
+	{
+	alert("Please Enter patient name");
+	formObj.t2.focus();
+	return false;
+	}
+
+	if(formObj.t4.value.length==0)
+	{
+	alert("Please Enter release blood volume");
+	formObj.t4.focus();
+	return false;
+	}
+		
+	return true;
+	}
+	</script>
+<style>
+body {
+  background-image: url("{% static 'images/back.jpg' %}");
+}
+</style>
+</head>
+<body>
+<!-- start header -->
+<div id="header">
+	<div id="logo">
+		<h1><span><center><font size="5" color="white"><br/>LifeLink: Online Blood Donation Network</font>
+
+</center></span></h1>
+		
+	</div>
+	<div id="menu">
+		<ul>      
+     <li><a href="{% url 'DonationDrive' %}"><font size="3" color="white">Blood Donation Drive</a></li>
+	 <li><a href="{% url 'ReleaseBlood' %}"><font size="3" color="white">Release Blood</a></li>
+	 <li><a href="{% url 'Forecast' %}"><font size="3" color="white">Forecast Blood</a></li>
+	  <li><a href="{% url 'Optimize' %}"><font size="3" color="white">Optimize Donor Engagement</a></li>
+	 <li><a href="{% url 'index' %}"><font size="3" color="white">Logout</a></li>
+   </ul>     
+		
+	</div>
+	
+</div>
+
+<div id="wrapper">
+	<!-- start page -->
+	<div id="page">
+		 <form name="f1" method="post" action="{% url 'ForecastAction' %}" OnSubmit="return validate(this)">
+	{% csrf_token %}
+		<!-- start content -->
+		<div id="content">
+		<div class="flower"><img src="{% static 'images/tra.jpg' %}" alt="" width="800" height="200" /></center></div>
+			<br/><br/>
+			<div class="flower"><center><h1>
+			<font size="" align="center">
+			Blood Demand Forecast Page</font><h1></div>
+			
+		
+			<center><font face="verdana" color="blue">{{ data|safe }}</center></font>
+		<br/>
+			<table align="center">
+			
+<tr><td><font size="3" color="black">Blood&nbsp;Type</td><td><select name="t1">
+<option value="A+">A+</option>
+<option value="A-">A-</option>
+<option value="AB+">AB+</option>
+<option value="AB-">AB-</option>
+<option value="B+">B+</option>
+<option value="B-">B-</option>
+<option value="O+">O+</option>
+<option value="O-">O-</option>
+</select>
+
+<tr><td><font size="3" color="black">Week&nbsp;Day</td><td><select name="t2">
+<option value="Sunday">Sunday</option>
+<option value="Monday">Monday</option>
+<option value="Tuesday">Tuesday</option>
+<option value="Wednesday">Wednesday</option>
+<option value="Thursday">Thursday</option>
+<option value="Friday">Friday</option>
+<option value="Saturday">Saturday</option>
+</select>
+</td></tr>
+
+<tr><td><font size="3" color="black">Month</td><td><select name="t3">
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+</select>
+</td></tr>
+
+<tr><td><font size="3" color="black">Year</td><td><select name="t4">
+<option value="2025">2025</option>
+<option value="2026">2026</option>
+<option value="2027">2027</option>
+<option value="2028">2028</option>
+<option value="2029">2029</option>
+<option value="2030">2030</option>
+</select>
+</td></tr>
+
+</td></tr>
+<tr><td></td><td><input type="submit" value="Submit"></td>
+</td></tr></table>
+</form>
+			</table>
+			</center><br /><div class="post">
+				
+				<div class="entry">
+					
+				</div>
+			</div>
+		</div>
+		<!-- end content -->
+		<!-- start sidebars -->
+		
+		<!-- end sidebars -->
+		<div style="clear: both;">&nbsp;</div>
+	</div>
+	<!-- end page -->
+</div>
+</body>
+</html>
+
+

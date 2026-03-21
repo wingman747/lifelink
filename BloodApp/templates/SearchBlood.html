@@ -1,0 +1,102 @@
+{% load static %}
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>LifeLink</title>
+<meta name="keywords" content="" />
+<meta name="Premium Series" content="" />
+<link href="{% static 'default.css' %}" rel="stylesheet" type="text/css" media="screen" />
+<script language="javascript">
+	function validate(formObj)
+	{
+	
+	if(formObj.t2.value.length==0)
+	{
+	alert("Please Enter platelets");
+	formObj.t2.focus();
+	return false;
+	}
+	formObj.actionUpdateData.value="update";
+	return true;
+	}
+	</script>
+<style>
+body {
+  background-image: url("{% static 'images/back.jpg' %}");
+}
+</style>
+</head>
+<body>
+<!-- start header -->
+<div id="header">
+	<div id="logo">
+		<h1><span><center><font size="5" color="white"><br/>LifeLink: Online Blood Donation Network</font>
+
+</center></span></h1>
+		
+	</div>
+	<div id="menu">
+		<ul>      
+     <li><a href="{% url 'SearchBlood' %}"><font size="3" color="white">Search Blood</a></li>
+		 <li><a href="{% url 'index' %}"><font size="3" color="white">Logout</a></li>
+   </ul>     
+		
+	</div>
+	
+</div>
+
+<div id="wrapper">
+	<!-- start page -->
+	<div id="page">
+		 <form name="f1" method="post" action="{% url 'SearchBloodAction' %}" OnSubmit="return validate(this)">
+	{% csrf_token %}
+		<!-- start content -->
+		<div id="content">
+		<div class="flower"><img src="{% static 'images/tra.jpg' %}" alt="" width="800" height="200" /></center></div>
+			<br/><br/>
+			<div class="flower"><center><h1>
+			<font size="" align="center">
+			Search Blood Page</font><h1></div>
+			
+		
+			<center><font face="verdana" color="blue">{{ data|safe }}</center></font>
+		<br/>
+			<table align="center">
+			
+<tr><td><font size="3" color="black">Blood&nbsp;Type</td><td><select name="t1">
+<option value="A+">A+</option>
+<option value="A-">A-</option>
+<option value="AB+">AB+</option>
+<option value="AB-">AB-</option>
+<option value="B+">B+</option>
+<option value="B-">B-</option>
+<option value="O+">O+</option>
+<option value="O-">O-</option>
+</select>
+
+<tr><td><font size="3" color="black">Required&nbsp;Platelets</td><td><input type="number" name="t2" size="15"/></td></tr>
+
+</td></tr>
+<tr><td></td><td><input type="submit" value="Submit"></td>
+</td></tr></table>
+</form>
+			</table>
+			</center><br /><div class="post">
+				
+				<div class="entry">
+					
+				</div>
+			</div>
+		</div>
+		<!-- end content -->
+		<!-- start sidebars -->
+		
+		<!-- end sidebars -->
+		<div style="clear: both;">&nbsp;</div>
+	</div>
+	<!-- end page -->
+</div>
+</body>
+</html>
+
+

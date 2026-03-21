@@ -1,0 +1,29 @@
+create database lifelink;
+use lifelink;
+
+create table releaseBlood(hospital_name varchar(40),
+patient_name varchar(40),
+blood_type varchar(12),
+volume varchar(40),
+release_date varchar(30),
+bank_name varchar(40));
+
+create table register(username varchar(40) primary key,
+password varchar(40),
+contact varchar(12),
+email varchar(40),
+address varchar(60),
+area_location varchar(50),
+description varchar(100),
+usertype varchar(30));
+
+create table inventory(username varchar(40),
+blood_type varchar(20),
+quantity double);
+
+create table donation(username varchar(40),
+donor_name varchar(40),
+volume_donate varchar(40),
+blood_type varchar(20),
+donate_date varchar(30),
+expiry_days varchar(10));
