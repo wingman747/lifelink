@@ -1,375 +1,142 @@
+{% extends "base.html" %}
 {% load static %}
-<html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>LifeLink</title>
-<meta name="keywords" content="" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #f5f6fa 0%, #ebedf5 50%, #f5eded 100%);
-  min-height: 100vh;
-  color: #1a1f36;
-}
+{% block title %}BloodApp - Home{% endblock %}
 
-/* Grid background */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.3;
-  background-image: radial-gradient(hsl(220 20% 80% / 0.4) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-}
-
-/* Ambient glow */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 400px;
-  background: rgba(220, 38, 38, 0.05);
-  border-radius: 50%;
-  filter: blur(120px);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ── Navbar ── */
-#header {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 32px;
-  border-bottom: 1px solid #e5e7eb;
-  background: rgba(255,255,255,0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  animation: slideDown 0.5s ease-out;
-}
-
-@keyframes slideDown {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-#logo h1 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  text-transform: uppercase;
-  color: #1a1f36;
-}
-
-#logo h1::before {
-  content: '';
-  width: 12px;
-  height: 12px;
-  background: #dc2626;
-  border-radius: 50%;
-  animation: pulseRed 2s infinite;
-}
-
-@keyframes pulseRed {
-  0% { box-shadow: 0 0 0 0 rgba(220,38,38,0.3); }
-  70% { box-shadow: 0 0 0 12px rgba(220,38,38,0); }
-  100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
-}
-
-#menu ul {
-  list-style: none;
-  display: flex;
-  gap: 32px;
-}
-
-#menu ul li a {
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  color: #6b7280;
-  transition: color 0.2s;
-  letter-spacing: 0.02em;
-}
-
-#menu ul li a:hover,
-#menu ul li.current_page_item a {
-  color: #dc2626;
-  font-weight: 600;
-}
-
-/* ── Wrapper ── */
-#wrapper {
-  position: relative;
-  z-index: 1;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 60px 16px 60px;
-}
-
-/* ── Page Header ── */
-.page-header {
-  text-align: center;
-  margin-bottom: 40px;
-  animation: fadeUp 0.6s ease-out 0.1s both;
-}
-
-.page-header .tag {
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  color: #dc2626;
-  margin-bottom: 16px;
-}
-
-.page-header h2 {
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  color: #1a1f36;
-  margin-bottom: 8px;
-}
-
-.page-header p {
-  color: #6b7280;
-  font-size: 14px;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ── Glass Card ── */
-.glass-card {
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  box-shadow: 0 4px 24px -4px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 32px;
-  animation: fadeUp 0.6s ease-out 0.2s both;
-}
-
-.glass-card .gradient-line {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(to right, transparent, #dc2626, transparent);
-}
-
-/* ── Session Banner ── */
-.session-banner {
-  padding: 24px;
-  text-align: center;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-/* ── Data message ── */
-.data-message {
-  padding: 16px 24px;
-  text-align: center;
-  font-size: 14px;
-  color: #1a1f36;
-}
-
-/* ── Table ── */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.table-header h3 {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #6b7280;
-}
-
-.data-table thead tr {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.data-table th {
-  padding: 16px 24px;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #6b7280;
-  background: transparent;
-  border: none;
-}
-
-.data-table td {
-  padding: 16px 24px;
-  font-size: 14px;
-  color: #1a1f36;
-  border: none;
-  border-bottom: 1px solid #f3f4f6;
-  background: transparent;
-}
-
-.data-table tr:hover td {
-  background: rgba(0,0,0,0.02);
-}
-
-.data-table td:nth-child(even),
-.data-table th:nth-child(even) {
-  background: transparent;
-}
-
-/* ── Chart image ── */
-.chart-section {
-  padding: 32px;
-  animation: fadeUp 0.6s ease-out 0.4s both;
-}
-
-.chart-section h3 {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #6b7280;
-  margin-bottom: 24px;
-}
-
-.chart-section img {
-  max-width: 100%;
-  border-radius: 12px;
-}
-
-/* ── Footer ── */
-.status-footer {
-  margin-top: 48px;
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: #6b7280;
-  animation: fadeUp 0.6s ease-out 0.6s both;
-}
-
-.status-footer .dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #10b981;
-  margin-right: 8px;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-</style>
-</head>
-<body>
-
-<!-- Navbar -->
-<div id="header">
-  <div id="logo">
-    <h1>LifeLink</h1>
-  </div>
-  <div id="menu">
-    <ul id="main">
-      <li><a href="{% url 'index' %}">Home</a></li>
-      <li><a href="{% url 'HospitalLogin' %}">Hospital</a></li>
-      <li class="current_page_item"><a href="{% url 'BankLogin' %}">Blood Bank</a></li>
-      <li><a href="{% url 'DonorLogin' %}">Donor</a></li>
-      <li><a href="{% url 'PatientLogin' %}">Patient</a></li>
-    </ul>
-  </div>
-</div>
-
-<div id="wrapper">
-  <div id="page">
-
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="tag">Blood Bank Dashboard</div>
-      <h2>Inventory Overview</h2>
-      <p>Real-time blood supply data and analytics</p>
+{% block content %}
+    <div style="text-align: center; margin-bottom: 60px;">
+        <p style="color: #dc2626; font-weight: 600; letter-spacing: 2px; font-size: 12px; margin-bottom: 15px;">WELCOME</p>
+        <h1 style="font-size: 48px; color: #111; margin-bottom: 15px;">Blood Donation Network</h1>
+        <p style="color: #666; font-size: 18px; max-width: 600px; margin: 0 auto;">
+            Save lives by connecting blood donors, blood banks, hospitals, and patients in one secure network.
+        </p>
     </div>
 
-    <!-- Session Banner -->
-    <div class="glass-card">
-      <div class="gradient-line"></div>
-      <div class="session-banner">
-        Blood Bank Operator — Session Active
-      </div>
+    <!-- ANALYTICS SECTION -->
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); margin: 40px 0;">
+        <h2 style="text-align: center; margin-bottom: 30px;">📊 System Analytics</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            
+            <!-- Total Users Card -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 32px; margin-bottom: 10px;">👥</div>
+                <h3 style="margin: 10px 0; font-size: 24px;">{{ total_users }}</h3>
+                <p style="margin: 0; font-size: 14px;">Total Users</p>
+            </div>
+            
+            <!-- Total Donors Card -->
+            <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 32px; margin-bottom: 10px;">🩸</div>
+                <h3 style="margin: 10px 0; font-size: 24px;">{{ total_donors }}</h3>
+                <p style="margin: 0; font-size: 14px;">Registered Donors</p>
+            </div>
+            
+            <!-- Total Hospitals Card -->
+            <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 32px; margin-bottom: 10px;">🏥</div>
+                <h3 style="margin: 10px 0; font-size: 24px;">{{ total_hospitals }}</h3>
+                <p style="margin: 0; font-size: 14px;">Hospitals</p>
+            </div>
+            
+            <!-- Total Blood Banks Card -->
+            <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 25px; border-radius: 10px; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+                <div style="font-size: 32px; margin-bottom: 10px;">🏢</div>
+                <h3 style="margin: 10px 0; font-size: 24px;">{{ total_blood_banks }}</h3>
+                <p style="margin: 0; font-size: 14px;">Blood Banks</p>
+            </div>
+            
+            <!-- Total Donations Card -->
+            <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; padding: 25px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 32px; margin-bottom: 10px;">📈</div>
+                <h3 style="margin: 10px 0; font-size: 24px;">{{ total_donations }}</h3>
+                <p style="margin: 0; font-size: 14px;">Total Donations</p>
+            </div>
+            
+            <!-- Patients Card -->
+            <div style="background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%); color: white; padding: 25px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 32px; margin-bottom: 10px;">🏨</div>
+                <h3 style="margin: 10px 0; font-size: 24px;">{{ total_users|add:'-'|add:total_donors|add:'-'|add:total_hospitals|add:'-'|add:total_blood_banks }}</h3>
+                <p style="margin: 0; font-size: 14px;">Patients</p>
+            </div>
+        </div>
+
+        <!-- Blood Type Distribution -->
+        {% if blood_type_distribution %}
+        <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #eee;">
+            <h3 style="margin-bottom: 20px;">🩸 Blood Type Inventory</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                {% for blood_type, quantity in blood_type_distribution.items %}
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; text-align: center; border-left: 4px solid #dc2626;">
+                    <h4 style="margin: 0 0 5px 0; color: #dc2626; font-size: 20px;">{{ blood_type }}</h4>
+                    <p style="margin: 0; color: #666;">{{ quantity }} Units</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
-    <!-- Data Message from Django -->
-    {% if data %}
-    <div class="glass-card">
-      <div class="gradient-line"></div>
-      <div class="data-message">{{ data|safe }}</div>
-    </div>
-    {% endif %}
-
-    <!-- Data Table -->
-    <div class="glass-card">
-      <div class="gradient-line"></div>
-      <div class="table-header">
-        <h3>Blood Stock Levels</h3>
-      </div>
-      <div style="overflow-x:auto;">
+    <!-- ML METRICS SECTION -->
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); margin: 40px 0;">
+        <h2 style="text-align: center; margin-bottom: 20px;">Machine Learning Performance Metrics</h2>
+        <p style="color: #666; margin-bottom: 20px; text-align: center;">Blood Demand Forecasting using Random Forest Algorithm</p>
+        
+        <!-- METRICS TABLE -->
         {{ data|safe }}
-      </div>
+        
+        <!-- CHART -->
+        <div style="text-align: center; margin-top: 30px;">
+            {% if img %}
+                <img src="data:image/png;base64,{{ img }}" alt="Performance Chart" style="max-width: 100%; height: auto; border-radius: 10px;">
+            {% endif %}
+        </div>
     </div>
 
-    <!-- Chart Image -->
-    {% if img %}
-    <div class="glass-card">
-      <div class="gradient-line"></div>
-      <div class="chart-section">
-        <h3>Supply Analytics</h3>
-        <img src="data:image/png;base64, {{ img }}" alt="Blood Supply Chart" />
-      </div>
+    <!-- QUICK LINKS -->
+    <div style="margin-top: 60px; margin-bottom: 60px;">
+        <h2 style="text-align: center; margin-bottom: 30px;">Get Started</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            
+            <!-- Hospital Card -->
+            <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-align: center; transition: transform 0.3s; border-top: 4px solid #4facfe;">
+                <div style="font-size: 40px; margin-bottom: 15px;">🏥</div>
+                <h3 style="color: #111; margin-bottom: 10px;">Hospital</h3>
+                <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Search and request blood for patients</p>
+                <a href="{% url 'HospitalLogin' %}" style="background: #dc2626; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block; font-weight: 600; transition: background 0.3s;">
+                    Login
+                </a>
+            </div>
+            
+            <!-- Blood Bank Card -->
+            <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #fa709a;">
+                <div style="font-size: 40px; margin-bottom: 15px;">🩸</div>
+                <h3 style="color: #111; margin-bottom: 10px;">Blood Bank</h3>
+                <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Manage inventory and donations</p>
+                <a href="{% url 'BankLogin' %}" style="background: #dc2626; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block; font-weight: 600; transition: background 0.3s;">
+                    Login
+                </a>
+            </div>
+            
+            <!-- Donor Card -->
+            <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #f093fb;">
+                <div style="font-size: 40px; margin-bottom: 15px;">👤</div>
+                <h3 style="color: #111; margin-bottom: 10px;">Donor</h3>
+                <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Track your donations and history</p>
+                <a href="{% url 'DonorLogin' %}" style="background: #dc2626; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block; font-weight: 600; transition: background 0.3s;">
+                    Login
+                </a>
+            </div>
+            
+            <!-- Patient Card -->
+            <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #ff9a56;">
+                <div style="font-size: 40px; margin-bottom: 15px;">🏨</div>
+                <h3 style="color: #111; margin-bottom: 10px;">Patient</h3>
+                <p style="color: #666; margin-bottom: 20px; font-size: 14px;">Find available blood nearby</p>
+                <a href="{% url 'PatientLogin' %}" style="background: #dc2626; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block; font-weight: 600; transition: background 0.3s;">
+                    Login
+                </a>
+            </div>
+        </div>
     </div>
-    {% endif %}
-
-    <!-- Footer -->
-    <div class="status-footer">
-      <div><span class="dot"></span>System Operational</div>
-      <div>Encrypted Connection</div>
-      <div>v2.4.0-Stable</div>
-    </div>
-
-  </div>
-</div>
-
-</body>
-</html>
+{% endblock %}

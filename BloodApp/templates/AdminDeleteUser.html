@@ -1,0 +1,14 @@
+def AdminDeleteUser(request):
+    if request.method == 'GET':
+        uid = request.GET.get('uid', False)
+        try:
+            con = pymysql.connect(host='127.0.0.1', port=3306, user='root', password='root', database='lifelink', charset='utf8')
+            with con:
+                cur = con.cursor()
+                cur.execute("delete from register where id="+str(uid))
+                con.commit()
+                message = '✅ User deleted successfully!'
+        except Exception as e:
+            message = '❌ Error deleting user: '+str(e)
+        
+        return redirect('AdminViewUsers')

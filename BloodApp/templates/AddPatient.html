@@ -1,36 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %}Release Blood - LifeLink{% endblock %}
+{% block title %}Add Patient - LifeLink{% endblock %}
 
 {% block content %}
     <div style="text-align: center; margin-bottom: 40px;">
-        <p style="color: #dc2626; font-weight: 600; letter-spacing: 2px; font-size: 12px; margin-bottom: 15px;">BLOOD RELEASE</p>
-        <h1 style="font-size: 42px; color: #111; margin-bottom: 15px;">Release Blood to Hospital</h1>
-        <p style="color: #666; font-size: 16px;">Release blood units to requesting hospitals</p>
+        <p style="color: #dc2626; font-weight: 600; letter-spacing: 2px; font-size: 12px; margin-bottom: 15px;">PATIENT MANAGEMENT</p>
+        <h1 style="font-size: 42px; color: #111; margin-bottom: 15px;">Add Patient</h1>
+        <p style="color: #666; font-size: 16px;">Register a new patient requiring blood transfusion</p>
     </div>
 
     {% if message %}
-        <div class="message {% if 'successfully' in message or 'released' in message %}success{% else %}error{% endif %}" style="max-width: 500px; margin: 20px auto;">
+        <div class="message {% if 'successfully' in message or 'added' in message %}success{% else %}error{% endif %}" style="max-width: 500px; margin: 20px auto;">
             {{ message }}
         </div>
     {% endif %}
 
     <div class="form-container">
-        <form method="post" action="{% url 'ReleaseBloodAction' %}" onsubmit="return validateReleaseBlood(this)">
+        <form method="post" action="{% url 'AddPatientAction' %}" onsubmit="return validatePatient(this)">
             {% csrf_token %}
             
             <div class="form-group">
-                <label for="hospital">HOSPITAL</label>
-                <select id="hospital" name="t1" required onchange="updateBloodRequests(this.value)">
-                    <option value="">Select Hospital</option>
-                    {% for hospital in hospitals %}
-                        <option value="{{ hospital }}">{{ hospital }}</option>
-                    {% endfor %}
-                </select>
+                <label for="patient_name">PATIENT NAME</label>
+                <input type="text" id="patient_name" name="t1" placeholder="Enter patient name" required>
             </div>
 
             <div class="form-group">
-                <label for="blood_type">BLOOD TYPE</label>
+                <label for="blood_type">BLOOD TYPE NEEDED</label>
                 <select id="blood_type" name="t2" required>
                     <option value="">Select Blood Type</option>
                     <option value="O+">O+</option>
@@ -46,23 +41,28 @@
 
             <div class="form-group">
                 <label for="quantity">QUANTITY (LITRES)</label>
-                <input type="number" id="quantity" name="t3" placeholder="Enter quantity to release" step="0.1" min="0.1" required>
+                <input type="number" id="quantity" name="t3" placeholder="Enter quantity" step="0.1" min="0.1" required>
             </div>
 
-            <button type="submit">Release Blood</button>
+            <div class="form-group">
+                <label for="condition">MEDICAL CONDITION</label>
+                <textarea id="condition" name="t4" placeholder="Describe the medical condition" required></textarea>
+            </div>
+
+            <button type="submit">Add Patient</button>
         </form>
 
         <div style="text-align: center; margin-top: 20px;">
             <p style="color: #666;">
-                <a href="{% url 'DonationDrive' %}" style="color: #dc2626; text-decoration: none; font-weight: 600;">← Back</a>s
+                <a href="{% url 'HospitalDashboard' %}" style="color: #dc2626; text-decoration: none; font-weight: 600;">← Back to Dashboard</a>
             </p>
         </div>
     </div>
 
     <script>
-        function validateReleaseBlood(form) {
+        function validatePatient(form) {
             if(form.t1.value.length == 0) {
-                alert("Please select hospital");
+                alert("Please enter patient name");
                 form.t1.focus();
                 return false;
             }
@@ -76,12 +76,12 @@
                 form.t3.focus();
                 return false;
             }
+            if(form.t4.value.length == 0) {
+                alert("Please describe medical condition");
+                form.t4.focus();
+                return false;
+            }
             return true;
-        }
-
-        function updateBloodRequests(hospital) {
-            // Optional: You can add logic here to show blood type requirements for selected hospital
-            console.log('Selected hospital:', hospital);
         }
     </script>
 {% endblock %}

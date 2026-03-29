@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - BloodApp{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; margin-bottom: 40px;">
+        <p style="color: #dc2626; font-weight: 600; letter-spacing: 2px; font-size: 12px; margin-bottom: 15px;">SECURE ACCESS</p>
+        <h1 style="font-size: 42px; color: #111; margin-bottom: 15px;">Admin Portal</h1>
+        <p style="color: #666; font-size: 16px;">System administrator login only</p>
+    </div>
+
+    {% if data %}
+        <div class="message error" style="max-width: 500px; margin: 0 auto 20px;">
+            {{ data }}
+        </div>
+    {% endif %}
+
+    <div class="form-container">
+        <form method="post" action="{% url 'AdminLoginAction' %}" onsubmit="return validateForm(this)">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="username">USERNAME</label>
+                <input type="text" id="username" name="t1" placeholder="Enter admin username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">PASSWORD</label>
+                <input type="password" id="password" name="t2" placeholder="Enter admin password" required>
+            </div>
+
+            <button type="submit">Admin Login</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <p style="color: #666;">
+                <strong>Demo Credentials:</strong><br>
+                Username: <code>admin</code><br>
+                Password: <code>admin123</code>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function validateForm(form) {
+            if(form.t1.value.length == 0) {
+                alert("Please Enter username");
+                form.t1.focus();
+                return false;
+            }
+            if(form.t2.value.length == 0) {
+                alert("Please Enter password");
+                form.t2.focus();
+                return false;
+            }
+            return true;
+        }
+    </script>
+{% endblock %}

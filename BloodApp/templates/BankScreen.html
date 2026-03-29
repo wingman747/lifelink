@@ -1,89 +1,59 @@
-{% load static %}
-<html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>LifeLink</title>
-<meta name="keywords" content="" />
-<meta name="Premium Series" content="" />
-<link href="{% static 'default.css' %}" rel="stylesheet" type="text/css" media="screen" />
-<style>
-body {
-  background-image: url("{% static 'images/back.jpg' %}");
-}
-progress {
-  text-align: center;
-}
-progress:after {
-  content: attr(value)'%';
-}
-</style>
-<style>
-table, th, td {
-  border: 3px solid blue;
-  border-collapse: collapse;
-}
+{% extends "base.html" %}
 
-th:nth-child(even),td:nth-child(even) {
-  background-color: #D6EEEE;
-}
-</style>
-</head>
-<body>
-<!-- start header -->
-<div id="header">
-	<div id="logo">
-		<h1><span><center><font size="5" color="white"><br/>LifeLink: Online Blood Donation Network</font>
+{% block title %}Blood Bank Dashboard - BloodApp{% endblock %}
 
-</center></span></h1>
-		
-	</div>
-	<div id="menu">
-		<ul>      
-     <li><a href="{% url 'DonationDrive' %}"><font size="3" color="white">Blood Donation Drive</a></li>
-	 <li><a href="{% url 'ReleaseBlood' %}"><font size="3" color="white">Release Blood</a></li>
-	 <li><a href="{% url 'Forecast' %}"><font size="3" color="white">Forecast Blood</a></li>
-	  <li><a href="{% url 'Optimize' %}"><font size="3" color="white">Optimize Donor Engagement</a></li>
-	 <li><a href="{% url 'index' %}"><font size="3" color="white">Logout</a></li>
-   </ul>     
-		
-	</div>
-	
-</div>
-<div id="wrapper">
-	<!-- start page -->
-	<div id="page">
-		
-		<!-- start content -->
-		<div id="content">
-			<div class="flower"><img src="{% static 'images/tra.jpg' %}" alt="" width="800" height="200" /></center></div>
-			<br/><br/>
+{% block content %}
+    <div style="margin-bottom: 30px;">
+        <h1>Blood Bank Dashboard</h1>
+        {% if data %}
+            <div class="message success">
+                {{ data|safe }}
+            </div>
+        {% endif %}
+    </div>
 
-			<center><font face="verdana" color="black">{{ data|safe }}</center></font><br/>
-		<img src="data:image/png;base64, {{ img }}" alt="" />
-	
-		<center>
-		
-			<table align="center">
-			<tr>
-			<h3>
-			</p></h3>
-			</table>
-			</center><br /><div class="post">
-				
-				<div class="entry">
-					
-				</div>
-			</div>
-		</div>
-		<!-- end content -->
-		<!-- start sidebars -->
-		
-		<!-- end sidebars -->
-		<div style="clear: both;">&nbsp;</div>
-	</div>
-	<!-- end page -->
-</div>
-</body>
-</html>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <a href="{% url 'Optimize' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-decoration: none; color: #111; transition: transform 0.3s;">
+            <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
+            <h3>Donor Engagement</h3>
+            <p style="color: #666; font-size: 14px;">Optimize donor engagement</p>
+        </a>
 
+        <a href="{% url 'DonationDrive' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-decoration: none; color: #111; transition: transform 0.3s;">
+            <div style="font-size: 32px; margin-bottom: 10px;">🩸</div>
+            <h3>Donation Drive</h3>
+            <p style="color: #666; font-size: 14px;">Record new donations</p>
+        </a>
 
+        <a href="{% url 'ReleaseBlood' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-decoration: none; color: #111; transition: transform 0.3s;">
+            <div style="font-size: 32px; margin-bottom: 10px;">📤</div>
+            <h3>Release Blood</h3>
+            <p style="color: #666; font-size: 14px;">Release blood to hospitals</p>
+        </a>
+
+        <a href="{% url 'Forecast' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-decoration: none; color: #111; transition: transform 0.3s;">
+            <div style="font-size: 32px; margin-bottom: 10px;">📈</div>
+            <h3>Forecast</h3>
+            <p style="color: #666; font-size: 14px;">Predict blood demand</p>
+        </a>
+
+        <a href="{% url 'ViewInventory' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-decoration: none; color: #111; transition: transform 0.3s; border-top: 4px solid #f093fb;">
+            <div style="font-size: 32px; margin-bottom: 10px;">📦</div>
+            <h3>Inventory</h3>
+            <p style="color: #666; font-size: 14px;">View & manage inventory</p>
+        </a>
+
+        <a href="{% url 'BloodExpiryTracker' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-decoration: none; color: #111; transition: transform 0.3s; border-top: 4px solid #fa709a;">
+            <div style="font-size: 32px; margin-bottom: 10px;">⏰</div>
+            <h3>Expiry Tracker</h3>
+            <p style="color: #666; font-size: 14px;">Track blood expiry dates</p>
+        </a>
+    </div>
+
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08);">
+        <h2>Dashboard Information</h2>
+        <div style="margin-top: 20px; overflow-x: auto;">
+            {{ data|safe }}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}View Patients - LifeLink{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; margin-bottom: 40px;">
+        <p style="color: #dc2626; font-weight: 600; letter-spacing: 2px; font-size: 12px; margin-bottom: 15px;">PATIENT MANAGEMENT</p>
+        <h1 style="font-size: 42px; color: #111; margin-bottom: 15px;">Hospital Patients</h1>
+        <p style="color: #666; font-size: 16px;">All patients admitted in your hospital</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>Blood Type</th>
+                <th>Quantity</th>
+                <th>Medical Condition</th>
+                <th>Admission Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ data|safe }}
+        </tbody>
+    </table>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{% url 'HospitalDashboard' %}" style="display: inline-block; padding: 12px 30px; background: #dc2626; color: white; text-decoration: none; border-radius: 5px; font-weight: 600;">← Back to Dashboard</a>
+    </div>
+{% endblock %}

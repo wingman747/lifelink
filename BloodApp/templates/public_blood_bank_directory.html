@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Blood Bank Directory - LifeLink{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; margin-bottom: 40px;">
+        <p style="color: #dc2626; font-weight: 600; letter-spacing: 2px; font-size: 12px; margin-bottom: 15px;">DIRECTORY</p>
+        <h1 style="font-size: 42px; color: #111; margin-bottom: 15px;">Blood Bank Directory</h1>
+        <p style="color: #666; font-size: 16px;">Find and contact blood banks near you</p>
+    </div>
+
+    <div class="form-container" style="max-width: 600px;">
+        <form method="get">
+            <div class="form-group">
+                <label>CITY</label>
+                <select name="city">
+                    <option value="">All Cities</option>
+                    {% for city in cities %}
+                        <option value="{{ city }}" {% if city == selected_city %}selected{% endif %}>{{ city }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <div style="margin-top: 40px;">
+        <h2 style="margin-bottom: 20px; text-align: center;">🏥 Available Blood Banks</h2>
+        
+        {% for bank in banks %}
+            <div style="background: white; padding: 20px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08);">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div style="flex: 1;">
+                        <h3 style="color: #111; margin-bottom: 10px;">{{ bank.0 }}</h3>
+                        <p style="color: #666; margin: 5px 0;"><strong>📍</strong> {{ bank.1 }}</p>
+                        <p style="color: #666; margin: 5px 0;"><strong>🏙️</strong> {{ bank.4 }}</p>
+                        <p style="color: #666; margin: 5px 0;"><strong>📱</strong> <a href="tel:{{ bank.2 }}" style="color: #dc2626; text-decoration: none;">{{ bank.2 }}</a></p>
+                        <p style="color: #666; margin: 5px 0;"><strong>📧</strong> <a href="mailto:{{ bank.3 }}" style="color: #dc2626; text-decoration: none;">{{ bank.3 }}</a></p>
+                    </div>
+                    <a href="tel:{{ bank.2 }}" style="padding: 10px 20px; background: #dc2626; color: white; text-decoration: none; border-radius: 5px; font-weight: 600; white-space: nowrap;">Call Now</a>
+                </div>
+            </div>
+        {% empty %}
+            <div style="text-align: center; padding: 40px; color: #999;">
+                <p>No blood banks found. Please try different city.</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

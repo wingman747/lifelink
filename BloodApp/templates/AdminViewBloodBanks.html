@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Blood Banks - Admin - BloodApp{% endblock %}
+
+{% block content %}
+    <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+        <h1>Blood Banks</h1>
+        <a href="{% url 'AdminDashboard' %}" style="background: #667eea; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600;">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08);">
+        <p style="color: #666; margin-bottom: 20px;">View all registered blood banks</p>
+        <div style="overflow-x: auto;">
+            {{ data|safe }}
+        </div>
+    </div>
+{% endblock %}

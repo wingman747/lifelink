@@ -1,0 +1,22 @@
+def AdminViewUsers(request):
+    if request.method == 'GET':
+        output = '<table border=1 align=center width=100%><tr><th><font size="3">ID</th><th><font size="3">Username</th><th><font size="3">Contact</th><th><font size="3">Email</th><th><font size="3">User Type</th><th><font size="3">Action</th></tr>'
+        
+        try:
+            con = pymysql.connect(host='127.0.0.1', port=3306, user='root', password='root', database='lifelink', charset='utf8')
+            with con:
+                cur = con.cursor()
+                cur.execute("select id, username, contact, email, usertype from register")
+                rows = cur.fetchall()
+                if rows:
+                    for row in rows:
+                        output += '<tr><td><font size="3">'+str(row[0])+'</td><td><font size="3">'+str(row[1])+'</td><td><font size="3">'+str(row[2])+'</td><td><font size="3">'+str(row[3])+'</td><td><font size="3">'+str(row[4])+'</td>'
+                        output += '<td><a href="/AdminDeleteUser/?uid='+str(row[0])+'"><font color="red">Delete</font></a></td></tr>'
+                else:
+                    output += '<tr><td colspan="6"><font size="3" color="orange">No users found</td></tr>'
+        except Exception as e:
+            output += '<tr><td colspan="6"><font size="3" color="red">Error: '+str(e)+'</td></tr>'
+        
+        output += "</table></br></br></br>"
+        context = {'data': output}
+        return render(request, 'AdminViewUsers.html', context)

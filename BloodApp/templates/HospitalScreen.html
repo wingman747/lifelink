@@ -1,86 +1,61 @@
-{% load static %}
-<html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>LifeLink</title>
-<meta name="keywords" content="" />
-<meta name="Premium Series" content="" />
-<link href="{% static 'default.css' %}" rel="stylesheet" type="text/css" media="screen" />
-<style>
-body {
-  background-image: url("{% static 'images/back.jpg' %}");
-}
-progress {
-  text-align: center;
-}
-progress:after {
-  content: attr(value)'%';
-}
-</style>
-<style>
-table, th, td {
-  border: 3px solid blue;
-  border-collapse: collapse;
-}
+{% extends "base.html" %}
 
-th:nth-child(even),td:nth-child(even) {
-  background-color: #D6EEEE;
-}
-</style>
-</head>
-<body>
-<!-- start header -->
-<div id="header">
-	<div id="logo">
-		<h1><span><center><font size="5" color="white"><br/>LifeLink: Online Blood Donation Network</font>
+{% block title %}Hospital Dashboard - LifeLink{% endblock %}
 
-</center></span></h1>
-		
-	</div>
-	<div id="menu">
-		<ul>      
-     <li><a href="{% url 'SearchBlood' %}"><font size="3" color="white">Search Blood</a></li>
-		 <li><a href="{% url 'index' %}"><font size="3" color="white">Logout</a></li>
-   </ul>     
-		
-	</div>
-	
-</div>
-<div id="wrapper">
-	<!-- start page -->
-	<div id="page">
-		
-		<!-- start content -->
-		<div id="content">
-			<div class="flower"><img src="{% static 'images/tra.jpg' %}" alt="" width="800" height="200" /></center></div>
-			<br/><br/>
+{% block content %}
+    <div style="text-align: center; margin-bottom: 40px;">
+        <p style="color: #dc2626; font-weight: 600; letter-spacing: 2px; font-size: 12px; margin-bottom: 15px;">HOSPITAL MANAGEMENT</p>
+        <h1 style="font-size: 42px; color: #111; margin-bottom: 15px;">Hospital Dashboard</h1>
+        <p style="color: #666; font-size: 16px;">Welcome back! Manage blood requests, patients, and inventory.</p>
+    </div>
 
-			<center><font face="verdana" color="black">{{ data|safe }}</center></font><br/>
-		<img src="data:image/png;base64, {{ img }}" alt="" />
-	
-		<center>
-		
-			<table align="center">
-			<tr>
-			<h3>
-			</p></h3>
-			</table>
-			</center><br /><div class="post">
-				
-				<div class="entry">
-					
-				</div>
-			</div>
-		</div>
-		<!-- end content -->
-		<!-- start sidebars -->
-		
-		<!-- end sidebars -->
-		<div style="clear: both;">&nbsp;</div>
-	</div>
-	<!-- end page -->
-</div>
-</body>
-</html>
+    {% if data %}
+        <div class="message success" style="max-width: none;">
+            {{ data|safe }}
+        </div>
+    {% endif %}
 
+    {% if message %}
+        <div class="message {% if 'successfully' in message or 'added' in message %}success{% else %}error{% endif %}" style="max-width: none;">
+            {{ message }}
+        </div>
+    {% endif %}
 
+    <!-- Dashboard Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 40px 0;">
+        <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-align: center;">
+            <p style="color: #666; font-weight: 600; letter-spacing: 1px; font-size: 12px; margin-bottom: 10px;">PENDING REQUESTS</p>
+            <h2 style="color: #dc2626; font-size: 36px; margin: 0;" id="pending-requests">0</h2>
+        </div>
+        <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-align: center;">
+            <p style="color: #666; font-weight: 600; letter-spacing: 1px; font-size: 12px; margin-bottom: 10px;">TOTAL PATIENTS</p>
+            <h2 style="color: #dc2626; font-size: 36px; margin: 0;" id="total-patients">0</h2>
+        </div>
+        <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-align: center;">
+            <p style="color: #666; font-weight: 600; letter-spacing: 1px; font-size: 12px; margin-bottom: 10px;">BLOOD INVENTORY</p>
+            <h2 style="color: #dc2626; font-size: 36px; margin: 0;" id="inventory">0L</h2>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="text-align: center; margin: 50px 0;">
+        <h2 style="margin-bottom: 30px;">⚡ Quick Actions</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <a href="{% url 'RequestBlood' %}" style="display: inline-block; padding: 14px 20px; background: #dc2626; color: white; text-decoration: none; border-radius: 5px; font-weight: 600; transition: background 0.3s;">📥 Request Blood</a>
+            <a href="{% url 'AddPatient' %}" style="display: inline-block; padding: 14px 20px; background: #dc2626; color: white; text-decoration: none; border-radius: 5px; font-weight: 600; transition: background 0.3s;">➕ Add Patient</a>
+            <a href="{% url 'ViewPatients' %}" style="display: inline-block; padding: 14px 20px; background: #dc2626; color: white; text-decoration: none; border-radius: 5px; font-weight: 600; transition: background 0.3s;">👥 View Patients</a>
+            <a href="{% url 'ViewBloodRequests' %}" style="display: inline-block; padding: 14px 20px; background: #dc2626; color: white; text-decoration: none; border-radius: 5px; font-weight: 600; transition: background 0.3s;">📋 View Requests</a>
+            <a href="{% url 'ViewHospitalInventory' %}" style="display: inline-block; padding: 14px 20px; background: #dc2626; color: white; text-decoration: none; border-radius: 5px; font-weight: 600; transition: background 0.3s;">📊 View Inventory</a>
+            <a href="{% url 'SearchBlood' %}" style="display: inline-block; padding: 14px 20px; background: #f3f4f6; color: #111; text-decoration: none; border-radius: 5px; font-weight: 600; transition: background 0.3s;">🔍 Search Blood</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stats = {{ stats|safe }};
+            document.getElementById('pending-requests').textContent = stats.pending_requests;
+            document.getElementById('total-patients').textContent = stats.total_patients;
+            document.getElementById('inventory').textContent = stats.total_inventory + 'L';
+        });
+    </script>
+{% endblock %}

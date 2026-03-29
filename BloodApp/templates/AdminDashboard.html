@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - BloodApp{% endblock %}
+
+{% block content %}
+    <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>👨‍💼 Admin Dashboard</h1>
+            <p style="color: #666;">System overview and management</p>
+        </div>
+        <a href="{% url 'AdminLogout' %}" style="background: #dc2626; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600;">
+            Logout
+        </a>
+    </div>
+
+    <!-- STATS CARDS -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 10px;">👥</div>
+            <h3 style="margin: 10px 0; font-size: 24px;">{{ total_users }}</h3>
+            <p style="margin: 0; font-size: 14px;">Total Users</p>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 10px;">🩸</div>
+            <h3 style="margin: 10px 0; font-size: 24px;">{{ total_donors }}</h3>
+            <p style="margin: 0; font-size: 14px;">Donors</p>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 10px;">🏥</div>
+            <h3 style="margin: 10px 0; font-size: 24px;">{{ total_hospitals }}</h3>
+            <p style="margin: 0; font-size: 14px;">Hospitals</p>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 25px; border-radius: 10px; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+            <div style="font-size: 32px; margin-bottom: 10px;">🏢</div>
+            <h3 style="margin: 10px 0; font-size: 24px;">{{ total_blood_banks }}</h3>
+            <p style="margin: 0; font-size: 14px;">Blood Banks</p>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; padding: 25px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 10px;">🏨</div>
+            <h3 style="margin: 10px 0; font-size: 24px;">{{ total_patients }}</h3>
+            <p style="margin: 0; font-size: 14px;">Patients</p>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%); color: white; padding: 25px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 32px; margin-bottom: 10px;">📈</div>
+            <h3 style="margin: 10px 0; font-size: 24px;">{{ total_donations }}</h3>
+            <p style="margin: 0; font-size: 14px;">Total Donations</p>
+        </div>
+
+    </div>
+
+    <!-- ADMIN MENU -->
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08);">
+        <h2 style="margin-bottom: 25px;">Admin Management</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            
+            <a href="{% url 'AdminViewUsers' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); text-decoration: none; color: #111; transition: transform 0.3s; border-top: 4px solid #667eea;">
+                <div style="font-size: 32px; margin-bottom: 10px;">👥</div>
+                <h3>View Users</h3>
+                <p style="color: #666; font-size: 14px;">Manage all registered users</p>
+            </a>
+
+            <a href="{% url 'AdminViewDonations' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); text-decoration: none; color: #111; transition: transform 0.3s; border-top: 4px solid #f093fb;">
+                <div style="font-size: 32px; margin-bottom: 10px;">🩸</div>
+                <h3>View Donations</h3>
+                <p style="color: #666; font-size: 14px;">Track all blood donations</p>
+            </a>
+
+            <a href="{% url 'AdminViewBloodBanks' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); text-decoration: none; color: #111; transition: transform 0.3s; border-top: 4px solid #4facfe;">
+                <div style="font-size: 32px; margin-bottom: 10px;">🏢</div>
+                <h3>Blood Banks</h3>
+                <p style="color: #666; font-size: 14px;">View all blood banks</p>
+            </a>
+
+            <a href="{% url 'AdminSystemReports' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); text-decoration: none; color: #111; transition: transform 0.3s; border-top: 4px solid #fa709a;">
+                <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
+                <h3>System Reports</h3>
+                <p style="color: #666; font-size: 14px;">View detailed statistics</p>
+            </a>
+
+            <a href="{% url 'AdminActivityLog' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); text-decoration: none; color: #111; transition: transform 0.3s; border-top: 4px solid #ff9a56;">
+                <div style="font-size: 32px; margin-bottom: 10px;">📝</div>
+                <h3>Activity Log</h3>
+                <p style="color: #666; font-size: 14px;">User activity & logs</p>
+            </a>
+
+            <a href="{% url 'index' %}" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 15px rgba(0,0,0,0.1); text-decoration: none; color: #111; transition: transform 0.3s; border-top: 4px solid #a8edea;">
+                <div style="font-size: 32px; margin-bottom: 10px;">🏠</div>
+                <h3>Back Home</h3>
+                <p style="color: #666; font-size: 14px;">Return to homepage</p>
+            </a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Find Blood Banks Near You - LifeLink{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; margin-bottom: 40px;">
+        <p style="color: #dc2626; font-weight: 600; letter-spacing: 2px; font-size: 12px; margin-bottom: 15px;">LOCATE SERVICES</p>
+        <h1 style="font-size: 42px; color: #111; margin-bottom: 15px;">Blood Bank Network Map</h1>
+        <p style="color: #666; font-size: 16px;">Find blood banks and hospitals near you • View availability • Get contact details</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 30px 0;">
+        <a href="{% url 'PublicFindNearestBloodBank' %}" style="display: block; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-decoration: none; color: #111; border-left: 4px solid #dc2626; transition: transform 0.3s;">
+            <h3 style="margin: 0 0 10px 0; color: #dc2626;">📍 Find Nearest</h3>
+            <p style="margin: 0; color: #666; font-size: 14px;">Locate blood banks closest to your location</p>
+        </a>
+        <a href="{% url 'PublicBloodBankDirectory' %}" style="display: block; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-decoration: none; color: #111; border-left: 4px solid #dc2626; transition: transform 0.3s;">
+            <h3 style="margin: 0 0 10px 0; color: #dc2626;">📋 Directory</h3>
+            <p style="margin: 0; color: #666; font-size: 14px;">Browse all blood banks and filter by location</p>
+        </a>
+        <a href="#map-section" style="display: block; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); text-decoration: none; color: #111; border-left: 4px solid #dc2626; transition: transform 0.3s;">
+            <h3 style="margin: 0 0 10px 0; color: #dc2626;">🗺️ View Map</h3>
+            <p style="margin: 0; color: #666; font-size: 14px;">Interactive map with all blood banks</p>
+        </a>
+    </div>
+
+    <!-- Map Section -->
+    <div id="map-section" style="background: white; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); overflow: hidden; margin: 30px 0; height: 600px;">
+        {{ map|safe }}
+    </div>
+
+    <!-- Legend -->
+    <div style="margin-top: 30px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08);">
+        <h2 style="margin-bottom: 20px; text-align: center;">📍 Map Legend</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="width: 40px; height: 40px; background: #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">🩸</div>
+                <div>
+                    <strong style="color: #111;">Blood Banks</strong>
+                    <p style="color: #666; margin: 5px 0; font-size: 14px;">Where blood is collected, tested, and stored</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">✚</div>
+                <div>
+                    <strong style="color: #111;">Hospitals</strong>
+                    <p style="color: #666; margin: 5px 0; font-size: 14px;">Medical facilities where transfusions occur</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="width: 40px; height: 40px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">📍</div>
+                <div>
+                    <strong style="color: #111;">Your Location</strong>
+                    <p style="color: #666; margin: 5px 0; font-size: 14px;">Your current position (when using location feature)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Section -->
+    <div style="margin-top: 40px; background: #f3f4f6; padding: 30px; border-radius: 10px;">
+        <h2 style="text-align: center; margin-bottom: 30px;">❓ How to Use</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div style="background: white; padding: 20px; border-radius: 8px;">
+                <h3 style="color: #dc2626; margin-bottom: 10px;">1️⃣ Find Nearest</h3>
+                <p style="color: #666; line-height: 1.6;">
+                    Click "Find Nearest" to locate blood banks closest to your location. We'll use your GPS coordinates to show the 5 nearest banks with their distance and contact information.
+                </p>
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 8px;">
+                <h3 style="color: #dc2626; margin-bottom: 10px;">2️⃣ Browse Directory</h3>
+                <p style="color: #666; line-height: 1.6;">
+                    Use the directory to search by city or blood type. Filter results to find blood banks with specific blood types in stock.
+                </p>
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 8px;">
+                <h3 style="color: #dc2626; margin-bottom: 10px;">3️⃣ Contact Directly</h3>
+                <p style="color: #666; line-height: 1.6;">
+                    Click the phone number to call directly or email for more information. All contact details are verified and up-to-date.
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

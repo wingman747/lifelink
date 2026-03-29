@@ -1,115 +1,51 @@
-{% load static %}
-<html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>LifeLink</title>
-<meta name="keywords" content="" />
-<meta name="Premium Series" content="" />
-<link href="{% static 'default.css' %}" rel="stylesheet" type="text/css" media="screen" />
-<script language="javascript">
+{% extends "base.html" %}
 
-	function validate(formObj)
-	{
-	if(formObj.t2.value.length==0)
-	{
-	alert("Please Enter blood donation volume");
-	formObj.t2.focus();
-	return false;
-	}
+{% block title %}Donation Drive - BloodApp{% endblock %}
 
-	if(formObj.t4.value.length==0)
-	{
-	alert("Please choose expiry date");
-	formObj.t4.focus();
-	return false;
-	}
-		
-	return true;
-	}
-	</script>
-<style>
-body {
-  background-image: url("{% static 'images/back.jpg' %}");
-}
-</style>
-</head>
-<body>
-<!-- start header -->
-<div id="header">
-	<div id="logo">
-		<h1><span><center><font size="5" color="white"><br/>LifeLink: Online Blood Donation Network</font>
+{% block content %}
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 36px;">Record Blood Donation</h1>
+        <p style="color: #666;">Add a new blood donation to the system</p>
+    </div>
 
-</center></span></h1>
-		
-	</div>
-	<div id="menu">
-		<ul>      
-     <li><a href="{% url 'DonationDrive' %}"><font size="3" color="white">Blood Donation Drive</a></li>
-	 <li><a href="{% url 'ReleaseBlood' %}"><font size="3" color="white">Release Blood</a></li>
-	 <li><a href="{% url 'Forecast' %}"><font size="3" color="white">Forecast Blood</a></li>
-	  <li><a href="{% url 'Optimize' %}"><font size="3" color="white">Optimize Donor Engagement</a></li>
-	 <li><a href="{% url 'index' %}"><font size="3" color="white">Logout</a></li>
-   </ul>     
-		
-	</div>
-	
-</div>
+    <div class="form-container" style="max-width: 500px;">
+        <form method="post" action="{% url 'DonationDriveAction' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="donor">DONOR</label>
+                <select id="donor" name="t1" required>
+                    <option value="">Select Donor</option>
+                    {{ data1|safe }}
+                </select>
+            </div>
 
-<div id="wrapper">
-	<!-- start page -->
-	<div id="page">
-		 <form name="f1" method="post" action="{% url 'DonationDriveAction' %}" OnSubmit="return validate(this)">
-	{% csrf_token %}
-		<!-- start content -->
-		<div id="content">
-		<div class="flower"><img src="{% static 'images/tra.jpg' %}" alt="" width="800" height="200" /></center></div>
-			<br/><br/>
-			<div class="flower"><center><h1>
-			<font size="" align="center">
-			Donation Drive Page</font><h1></div>
-			
-		
-			<center><font face="verdana" color="blue">{{ data|safe }}</center></font>
-		<br/>
-			<table align="center">
-			{{data1|safe}}
-<tr><td><font size="3" color="black">Volume&nbsp;Donate</td><td><input type="text" name="t2" size="15" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*"/></td></tr>
-<tr><td><font size="3" color="black">Blood&nbsp;Type</td><td><select name="t3">
-<option value="A+">A+</option>
-<option value="A-">A-</option>
-<option value="AB+">AB+</option>
-<option value="AB-">AB-</option>
-<option value="B+">B+</option>
-<option value="B-">B-</option>
-<option value="O+">O+</option>
-<option value="O-">O-</option>
-</select>
+            <div class="form-group">
+                <label for="volume">VOLUME (in Liters)</label>
+                <input type="number" id="volume" name="t2" placeholder="Enter blood volume" step="0.1" required>
+            </div>
 
-<tr><td><font size="3" color="black">Expiry&nbsp;Date</td><td><input type="date" name="t4" size="15"/> 
+            <div class="form-group">
+                <label for="bloodtype">BLOOD TYPE</label>
+                <select id="bloodtype" name="t3" required>
+                    <option value="">Select Blood Type</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                </select>
+            </div>
 
+            <div class="form-group">
+                <label for="expiry">EXPIRY DATE</label>
+                <input type="date" id="expiry" name="t4" required>
+            </div>
 
-
-</td></tr>
-<tr><td></td><td><input type="submit" value="Submit"></td>
-</td></tr></table>
-</form>
-			</table>
-			</center><br /><div class="post">
-				
-				<div class="entry">
-					
-				</div>
-			</div>
-		</div>
-		<!-- end content -->
-		<!-- start sidebars -->
-		
-		<!-- end sidebars -->
-		<div style="clear: both;">&nbsp;</div>
-	</div>
-	<!-- end page -->
-</div>
-</body>
-</html>
-
-
+            <button type="submit">Record Donation</button>
+        </form>
+    </div>
+{% endblock %}

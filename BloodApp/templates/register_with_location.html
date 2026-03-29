@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Register - LifeLink{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; margin-bottom: 40px;">
+        <p style="color: #dc2626; font-weight: 600; letter-spacing: 2px; font-size: 12px; margin-bottom: 15px;">JOIN NETWORK</p>
+        <h1 style="font-size: 42px; color: #111; margin-bottom: 15px;">Create Your Account</h1>
+        <p style="color: #666; font-size: 16px;">Join LifeLink and help save lives</p>
+    </div>
+
+    {% if data %}
+        <div class="message {% if 'successfully' in data or 'registered' in data %}success{% else %}error{% endif %}" style="max-width: 500px; margin: 20px auto;">
+            {{ data }}
+        </div>
+    {% endif %}
+
+    <div class="form-container">
+        <form method="post" action="{% url 'RegisterAction' %}" onsubmit="return validateRegistration(this)">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="username">USERNAME</label>
+                <input type="text" id="username" name="t1" placeholder="Enter username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">PASSWORD</label>
+                <input type="password" id="password" name="t2" placeholder="Enter password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">CONTACT NUMBER</label>
+                <input type="tel" id="phone" name="t3" placeholder="Enter 10-digit phone number" pattern="[0-9]{10}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">EMAIL ADDRESS</label>
+                <input type="email" id="email" name="t4" placeholder="Enter valid email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="address">ADDRESS</label>
+                <input type="text" id="address" name="t5" placeholder="Enter full address" required>
+            </div>
+
+            <div class="form-group">
+                <label for="location">AREA/CITY</label>
+                <input type="text" id="location" name="t6" placeholder="Enter area or city name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">ABOUT YOU/YOUR ORGANIZATION</label>
+                <textarea id="description" name="t7" placeholder="Tell us about yourself" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="user_type">USER TYPE</label>
+                <select id="user_type" name="t8" onchange="showLocationFields(this.value)" required>
+                    <option value="">Select User Type</option>
+                    <option value="Hospital">Hospital</option>
+                    <option value="Blood Bank">Blood Bank</option>
+                    <option value="Donor">Donor</option>
+                    <option value="Patient">Patient</option>
+                </select>
+            </div>
+
+            <!-- Location Fields (Only for Blood Bank and Hospital) -->
+            <div id="location-fields" style="display: none;">
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="color: #111; margin-bottom: 15px;">📍 Location Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="latitude">LATITUDE</label>
+                        <input type="text" id="latitude" name="latitude" placeholder="Click 'Get My Location' to auto-fill" readonly>
+                        <small style="color: #666; display: block; margin-top: 5px;">Will be auto-filled when you click the button below</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="longitude">LONGITUDE</label>
+                        <input type="text" id="longitude" name="longitude" placeholder="Click 'Get My Location' to auto-fill" readonly>
+                        <small style="color: #666; display: block; margin-top: 5px;">Will be auto-filled when you click the button below</small>
+                    </div>
+
+                    <button type="button" onclick="getLocationCoordinates()" style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 5px; font-weight: 600; cursor: pointer;">
+                        📍 Get My Location
+                    </button>
+                    
+                    <div id="location-status" style="margin-top: 10px; padding: 10px; border-radius: 5px; display: none;"></div>
+
+                    <div id="map-preview" style="margin-top: 15px; height: 300px; border-radius: 8px; overflow: hidden; display: none;"></div>
+
+                    <p style="color: #666; margin-top: 15px; font-size: 14px;">
+                        💡 <strong>Pro Tip:</strong> Your location helps patients and hospitals find you easily. Make sure to allow location access when prompted.
+                    </p>
+                </div>
+            </div>
+
+            <button type="submit">Create Account</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <p style="color: #666;">
+                Already have an account? 
+                <a href="{% url 'HospitalLogin' %}" style="color: #dc2626; text-decoration: none; font-weight: 600;">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Load Folium/Leaflet for map preview -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+    <script>
+        let map = null;
+        let marker = null;
+
+        function showLocationFields(userType) {
+            const locationFields = document.getElementById('location-fields');
+            if (userType === 'Blood Bank' || userType === 'Hospital') {
+                locationFields.style.display = 'block';
+            } else {
+                locationFields.style.display = 'none';
+                // Clear location fields if not needed
+                document.getElementById('latitude').value = '';
+                document.getElementById('longitude').value = '';
+            }
+        }
+
+        function getLocationCoordinates() {
+            if (navigator.geolocation) {
+                document.getElementById('location-status').style.display = 'block';
+                document.getElementById('location-status').textContent = '⏳ Getting your location...';
+                document.getElementById('location-status').style.background = '#fef3c7';
+                document.getElementById('location-status').style.color = '#78350f';
+
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    document.getElementById('latitude').value = lat.toFixed(6);
+                    document.getElementById('longitude').value = lon.toFixed(6);
+
+                    document.getElementById('location-status').textContent = '✓ Location captured successfully!';
+                    document.getElementById('location-status').style.background = '#dcfce7';
+                    document.getElementById('location-status').style.color = '#166534';
+
+                    // Show map preview
+                    initializeMapPreview(lat, lon);
+
+                }, function(error) {
+                    document.getElementById('location-status').textContent = '✗ Error: ' + error.message;
+                    document.getElementById('location-status').style.background = '#fee2e2';
+                    document.getElementById('location-status').style.color = '#b91c1c';
+                });
+            } else {
+                alert('Geolocation is not supported by your browser. Please enter coordinates manually.');
+            }
+        }
+
+        function initializeMapPreview(lat, lon) {
+            const mapContainer = document.getElementById('map-preview');
+            mapContainer.style.display = 'block';
+
+            if (map) {
+                map.remove();
+            }
+
+            map = L.map('map-preview').setView([lat, lon], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            marker = L.marker([lat, lon], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map).bindPopup('Your Location');
+
+            // Add click to reposition marker
+            map.on('click', function(e) {
+                const newLat = e.latlng.lat;
+                const newLon = e.latlng.lng;
+                
+                document.getElementById('latitude').value = newLat.toFixed(6);
+                document.getElementById('longitude').value = newLon.toFixed(6);
+
+                if (marker) {
+                    marker.setLatLng([newLat, newLon]);
+                } else {
+                    marker = L.marker([newLat, newLon]).addTo(map).bindPopup('Your Location');
+                }
+            });
+        }
+
+        function validateRegistration(form) {
+            if(form.t1.value.length == 0) {
+                alert("Please enter username");
+                form.t1.focus();
+                return false;
+            }
+            if(form.t2.value.length < 6) {
+                alert("Password must be at least 6 characters");
+                form.t2.focus();
+                return false;
+            }
+            if(form.t3.value.length != 10) {
+                alert("Phone number must be 10 digits");
+                form.t3.focus();
+                return false;
+            }
+            if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.t4.value)) {
+                alert("Please enter valid email");
+                form.t4.focus();
+                return false;
+            }
+
+            // Check location for Blood Bank and Hospital
+            if(form.t8.value === 'Blood Bank' || form.t8.value === 'Hospital') {
+                if(!form.latitude.value || !form.longitude.value) {
+                    alert("Please capture your location for Blood Bank/Hospital registration");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    </script>
+{% endblock %}

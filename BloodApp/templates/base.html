@@ -1,0 +1,669 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BloodApp{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        /* NAVBAR */
+        nav {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #dc2626;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo::before {
+            content: "●";
+            font-size: 28px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 14px;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #dc2626;
+        }
+        
+        .join-btn {
+            background: white;
+            border: 2px solid #333;
+            color: #333;
+            padding: 10px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .join-btn:hover {
+            background: #333;
+            color: white;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+        }
+
+        /* MAIN CONTENT */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            color: #111;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            font-size: 24px;
+            color: #111;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 18px;
+            color: #111;
+            margin-bottom: 15px;
+        }
+        
+        /* FORM STYLES */
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            max-width: 500px;
+            margin: 40px auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            letter-spacing: 1px;
+            font-size: 12px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        input[readonly] {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        button {
+            background: #dc2626;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #b91c1c;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+        
+        /* TABLE STYLES */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            margin: 20px 0;
+        }
+        
+        th {
+            background: #dc2626;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* MESSAGE STYLES */
+        .message {
+            background: #dbeafe;
+            border-left: 4px solid #dc2626;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: #333;
+        }
+        
+        .message.error {
+            background: #fee2e2;
+            color: #b91c1c;
+            border-left-color: #dc2626;
+        }
+        
+        .message.success {
+            background: #dcfce7;
+            border-left-color: #16a34a;
+            color: #166534;
+        }
+
+        .message.warning {
+            background: #fef3c7;
+            border-left-color: #f59e0b;
+            color: #92400e;
+        }
+
+        .message.info {
+            background: #dbeafe;
+            border-left-color: #3b82f6;
+            color: #1e40af;
+        }
+
+        small {
+            font-size: 12px;
+            color: #666;
+        }
+
+        a {
+            color: #dc2626;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #b91c1c;
+        }
+        
+        /* FOOTER */
+        footer {
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 50px;
+            font-size: 14px;
+        }
+
+        footer a {
+            color: #dc2626;
+        }
+
+        footer a:hover {
+            color: #fff;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 20px;
+                height: auto;
+                flex-wrap: wrap;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px 0;
+                border-top: 1px solid #eee;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .join-btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .container {
+                padding: 20px 10px;
+            }
+
+            .form-container {
+                padding: 20px;
+                max-width: 100%;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                padding: 0 15px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .form-container {
+                padding: 15px;
+            }
+
+            button {
+                padding: 10px 20px;
+            }
+        }
+
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .mt-40 {
+            margin-top: 40px;
+        }
+
+        .mb-40 {
+            margin-bottom: 40px;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gap-10 {
+            gap: 10px;
+        }
+
+        .gap-20 {
+            gap: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .rounded {
+            border-radius: 5px;
+        }
+
+        .shadow {
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        }
+
+        .bg-white {
+            background: white;
+        }
+
+        .bg-light {
+            background: #f5f5f5;
+        }
+
+        .text-muted {
+            color: #666;
+        }
+
+        .text-danger {
+            color: #dc2626;
+        }
+
+        .text-success {
+            color: #16a34a;
+        }
+
+        .text-warning {
+            color: #f59e0b;
+        }
+
+        .text-info {
+            color: #3b82f6;
+        }
+
+        .border-danger {
+            border-left: 4px solid #dc2626;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #dc2626;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111;
+        }
+
+        .card-body {
+            padding: 0;
+        }
+
+        .card-footer {
+            border-top: 1px solid #f3f4f6;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- NAVIGATION -->
+    <nav>
+        <a href="{% url 'index' %}" class="logo">LIFELINK</a>
+        
+        <button class="mobile-menu-toggle" onclick="toggleMenu()">☰</button>
+        
+        <ul class="nav-links" id="navLinks">
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="{% url 'HospitalLogin' %}">Hospital</a></li>
+            <li><a href="{% url 'BankLogin' %}">Blood Bank</a></li>
+            <li><a href="{% url 'DonorLogin' %}">Donor</a></li>
+            <li><a href="{% url 'PatientLogin' %}">Patient</a></li>
+            <li><a href="{% url 'BloodBankMap' %}" style="color: #dc2626;">🗺️ Find Blood Bank</a></li>
+        </ul>
+        
+        <a href="{% url 'Register' %}" class="join-btn">JOIN NETWORK</a>
+    </nav>
+    
+    <!-- CONTENT -->
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2026 LIFELINK - Online Blood Donation Network | All Rights Reserved</p>
+        <p style="margin-top: 10px; font-size: 12px;">
+            <a href="#">Privacy Policy</a> | 
+            <a href="#">Terms of Service</a> | 
+            <a href="#">Contact Us</a>
+        </p>
+    </footer>
+    
+    <script>
+        // Mobile Menu Toggle
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+
+        // Close menu when link is clicked
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navLinks').classList.remove('active');
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const nav = document.querySelector('nav');
+            const navLinks = document.getElementById('navLinks');
+            if (!nav.contains(e.target)) {
+                navLinks.classList.remove('active');
+            }
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
+
+        // Add active class to current nav link
+        window.addEventListener('load', () => {
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
