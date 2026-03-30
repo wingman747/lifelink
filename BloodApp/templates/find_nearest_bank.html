@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Find Nearest Blood Bank{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+    <h1 style="text-align: center; margin-bottom: 30px;">🏥 Find Nearest Blood Bank</h1>
+    
+    <!-- Search Form -->
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); margin-bottom: 30px;">
+        <form method="POST" action="">
+            {% csrf_token %}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label for="latitude"><strong>Your Latitude:</strong></label>
+                    <input type="number" name="latitude" id="latitude" step="0.0001" placeholder="e.g., 28.6139" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                </div>
+                
+                <div class="form-group">
+                    <label for="longitude"><strong>Your Longitude:</strong></label>
+                    <input type="number" name="longitude" id="longitude" step="0.0001" placeholder="e.g., 77.2090" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                </div>
+                
+                <div class="form-group">
+                    <label for="blood_type"><strong>Blood Type (Optional):</strong></label>
+                    <select name="blood_type" id="blood_type" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                        <option value="">Select Blood Type</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="button" onclick="getCurrentLocation()" style="background: #16a34a; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; margin-bottom: 20px;">
+                📍 Use My Current Location
+            </button>
+            
+            <button type="submit" style="background: #dc2626; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%; font-size: 14px;">
+                🔍 Find Nearest Blood Banks
+            </button>
+        </form>
+    </div>
+    
+    <!-- Map (if available) -->
+    {% if map %}
+    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08); margin-bottom: 30px;">
+        <h2 style="margin-top: 0;">📍 Location Map</h2>
+        <div style="height: 500px; border-radius: 5px; overflow: hidden;">
+            {{ map|safe }}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Results -->
+    {% if nearest_banks %}
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08);">
+        <h2>📍 Nearest Blood Banks Found ({{ nearest_banks|length }})</h2>
+        
+        {% for bank in nearest_banks %}
+        <div style="border-left: 4px solid #dc2626; padding: 20px; margin: 15px 0; background: #fee2e2; border-radius: 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h3 style="color: #dc2626; margin: 0 0 15px 0;">{{ bank.name }}</h3>
+                    
+                    <p style="margin: 8px 0;"><strong>📍 Address:</strong> {{ bank.address }}</p>
+                    <p style="margin: 8px 0;"><strong>🏙️ City:</strong> {{ bank.city }}</p>
+                    <p style="margin: 8px 0;"><strong>📞 Phone:</strong> {{ bank.phone }}</p>
+                    <p style="margin: 8px 0;"><strong>🛣️ Distance:</strong> <span style="background: #dc2626; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600;">{{ bank.distance }} km</span></p>
+                </div>
+                
+                <button style="background: #3b82f6; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; height: fit-content;">
+                    📞 Call Now
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            document.getElementById('latitude').value = position.coords.latitude.toFixed(4);
+            document.getElementById('longitude').value = position.coords.longitude.toFixed(4);
+            alert('✅ Location captured! Click "Find Nearest Blood Banks" to search.');
+        }, function(error) {
+            alert('❌ Could not get your location. Please enter manually.');
+        });
+    } else {
+        alert('Geolocation is not supported by your browser');
+    }
+}
+</script>
+{% endblock %}

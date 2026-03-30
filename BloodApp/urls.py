@@ -95,7 +95,7 @@ urlpatterns = [
 
     path('Register/', views.Register, name='Register'),
     path('Register/action/', views.RegisterAction, name='RegisterAction'),
-    path('BloodBankMap/', views.PublicBloodBankMap, name='BloodBankMap'),
-    path('FindNearestBloodBank/', views.PublicFindNearestBloodBank, name='FindNearestBloodBank'),
-    path('BloodBankDirectory/', views.PublicBloodBankDirectory, name='BloodBankDirectory'),
+    path('BloodBankMap/', views.PublicBloodBankMap, name='PublicBloodBankMap'),  # ✅ Add "Public" prefix
+    path('FindNearestBloodBank/', views.PublicFindNearestBloodBank, name='PublicFindNearestBloodBank'),
+    path('BloodBankDirectory/', views.PublicBloodBankDirectory, name='PublicBloodBankDirectory'),
 ]
