@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Approve Blood Request{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h1 style="text-align: center; color: #dc2626; margin-bottom: 30px;">⚠️ Approve Blood Request</h1>
+    
+    <!-- Request Details -->
+    <div style="background: #f0f9f0; border-left: 4px solid #16a34a; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <p><strong>🏥 Hospital:</strong> {{ blood_request.hospital.name }}</p>
+        <p><strong>🩸 Blood Type:</strong> <span style="background: #dc2626; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600;">{{ blood_request.blood_type }}</span></p>
+        <p><strong>📦 Units Requested:</strong> {{ blood_request.units_required }}</p>
+        <p><strong>⏰ Urgency:</strong> {{ blood_request.get_urgency_level_display }}</p>
+    </div>
+    
+    <!-- Inventory Check -->
+    <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <p><strong>Available Units of {{ blood_request.blood_type }}:</strong></p>
+        <p style="font-size: 24px; color: #dc2626; font-weight: bold; margin: 10px 0;">{{ available_units }} Units</p>
+    </div>
+    
+    <!-- Approval Form -->
+    <form method="POST" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08);">
+        {% csrf_token %}
+        
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label for="units_approved" style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <strong>Units to Approve:</strong>
+            </label>
+            <input type="number" name="units_approved" id="units_approved" min="1" max="{{ available_units }}" value="{{ blood_request.units_required }}" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+            <small style="color: #666;">Max available: {{ available_units }} units</small>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label for="remarks" style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <strong>Remarks (Optional):</strong>
+            </label>
+            <textarea name="remarks" id="remarks" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; min-height: 100px;">Approved for immediate release</textarea>
+        </div>
+        
+        <button type="submit" style="background: #16a34a; color: white; padding: 12px 30px; border: none; border-radius: 5px; font-weight: 600; width: 100%; font-size: 14px; cursor: pointer;">
+            ✅ Approve Request
+        </button>
+        
+        <a href="{% url 'blood_bank_dashboard' %}" style="display: block; text-align: center; margin-top: 10px; color: #666; text-decoration: none;">
+            ← Back to Dashboard
+        </a>
+    </form>
+</div>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('{% url "approve_blood_request" blood_request.id %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.href = "{% url 'blood_bank_dashboard' %}";
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+});
+</script>
+{% endblock %}

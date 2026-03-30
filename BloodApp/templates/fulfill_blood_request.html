@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Fulfill Blood Request{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h1 style="text-align: center; color: #16a34a; margin-bottom: 30px;">✅ Release Blood</h1>
+    
+    <!-- Request Details -->
+    <div style="background: #f0f9f0; border-left: 4px solid #16a34a; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <p><strong>🏥 Hospital:</strong> {{ blood_request.hospital.name }}</p>
+        <p><strong>🩸 Blood Type:</strong> <span style="background: #dc2626; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600;">{{ blood_request.blood_type }}</span></p>
+        <p><strong>✅ Units Approved:</strong> {{ blood_request.units_approved }}</p>
+    </div>
+    
+    <!-- Fulfill Form -->
+    <form method="POST" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 20px rgba(0,0,0,0.08);">
+        {% csrf_token %}
+        
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label for="units_given" style="display: block; font-weight: 600; margin-bottom: 8px;">
+                <strong>Units to Release:</strong>
+            </label>
+            <input type="number" name="units_given" id="units_given" min="1" max="{{ units_approved }}" value="{{ units_approved }}" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+            <small style="color: #666;">Max approved: {{ units_approved }} units</small>
+        </div>
+        
+        <button type="submit" style="background: #16a34a; color: white; padding: 12px 30px; border: none; border-radius: 5px; font-weight: 600; width: 100%; font-size: 14px; cursor: pointer;">
+            📦 Release Blood Now
+        </button>
+        
+        <a href="{% url 'blood_bank_dashboard' %}" style="display: block; text-align: center; margin-top: 10px; color: #666; text-decoration: none;">
+            ← Back to Dashboard
+        </a>
+    </form>
+</div>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('{% url "fulfill_blood_request" blood_request.id %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.href = "{% url 'blood_bank_dashboard' %}";
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+});
+</script>
+{% endblock %}

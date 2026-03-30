@@ -98,4 +98,19 @@ urlpatterns = [
     path('BloodBankMap/', views.PublicBloodBankMap, name='PublicBloodBankMap'),  # ✅ Add "Public" prefix
     path('FindNearestBloodBank/', views.PublicFindNearestBloodBank, name='PublicFindNearestBloodBank'),
     path('BloodBankDirectory/', views.PublicBloodBankDirectory, name='PublicBloodBankDirectory'),
+
+    # Add these lines to your urlpatterns list
+
+    # Blood Bank URLs
+    path('blood-bank/dashboard/', views.blood_bank_dashboard, name='blood_bank_dashboard'),
+    path('blood-request/<int:request_id>/', views.view_blood_request, name='view_blood_request'),
+    path('blood-request/<int:request_id>/approve/', views.approve_blood_request, name='approve_blood_request'),
+    path('blood-request/<int:request_id>/fulfill/', views.fulfill_blood_request, name='fulfill_blood_request'),
+    path('blood-request/<int:request_id>/reject/', views.reject_blood_request, name='reject_blood_request'),
+    path('blood-requests/json/', views.get_blood_requests_json, name='get_blood_requests_json'),
+
+    # Hospital URLs
+    path('hospital/request-blood/', views.request_blood, name='request_blood'),
+    path('hospital/blood-requests/', views.hospital_blood_requests, name='hospital_blood_requests'),
+    path('hospital/blood-request/<int:request_id>/', views.hospital_view_request, name='hospital_view_request'),
 ]

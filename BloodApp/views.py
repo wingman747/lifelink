@@ -1,12 +1,16 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.template import RequestContext
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
 from django.contrib.auth.models import User
-from .models import HospitalBloodBankVerification, InstitutionUser
+from django.contrib.auth.decorators import login_required
+from BloodApp.models import BloodRequest, BloodRequestNotification
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
 import os
 import io
 import base64
@@ -1439,3 +1443,381 @@ def PublicBloodBankDirectory(request):
             'selected_city': city
         }
         return render(request, 'public_blood_bank_directory.html', context)
+
+
+
+
+
+
+# ============================================
+# BLOOD BANK VIEWS
+# ============================================
+
+@login_required
+def blood_bank_dashboard(request):
+    """Blood Bank main dashboard"""
+    try:
+        # Import here to avoid circular imports
+        from BloodApp.models import BloodBank
+        blood_bank = BloodBank.objects.get(user=request.user)
+    except:
+        return redirect('index')
+    
+    # Get pending requests
+    pending_requests = BloodRequest.objects.filter(
+        blood_bank=blood_bank,
+        status='pending'
+    ).order_by('-urgency_level', '-created_at')
+    
+    # Get recent activity
+    approved_today = BloodRequest.objects.filter(
+        blood_bank=blood_bank,
+        status='approved',
+        approved_at__date=timezone.now().date()
+    ).count()
+    
+    fulfilled_today = BloodRequest.objects.filter(
+        blood_bank=blood_bank,
+        status='fulfilled',
+        fulfilled_at__date=timezone.now().date()
+    ).count()
+    
+    # Get unread notifications
+    unread_count = BloodRequestNotification.objects.filter(
+        is_read=False,
+        request__blood_bank=blood_bank
+    ).count()
+    
+    # Get inventory
+    try:
+        inventory = blood_bank.inventory.get_inventory_dict()
+    except:
+        inventory = {}
+    
+    context = {
+        'blood_bank': blood_bank,
+        'pending_requests': pending_requests,
+        'approved_today': approved_today,
+        'fulfilled_today': fulfilled_today,
+        'unread_count': unread_count,
+        'inventory': inventory
+    }
+    
+    return render(request, 'blood_bank_dashboard.html', context)
+
+
+@login_required
+def view_blood_request(request, request_id):
+    """View details of a blood request"""
+    blood_request = get_object_or_404(BloodRequest, id=request_id)
+    
+    # Verify blood bank access
+    try:
+        from BloodApp.models import BloodBank
+        blood_bank = BloodBank.objects.get(user=request.user)
+        if blood_request.blood_bank != blood_bank:
+            return redirect('blood_bank_dashboard')
+    except:
+        return redirect('index')
+    
+    context = {
+        'blood_request': blood_request,
+        'hospital': blood_request.hospital,
+        'available_units': blood_bank.inventory.get_available_units(blood_request.blood_type)
+    }
+    
+    return render(request, 'view_blood_request.html', context)
+
+
+@login_required
+def approve_blood_request(request, request_id):
+    """Blood bank approves a request"""
+    blood_request = get_object_or_404(BloodRequest, id=request_id)
+    
+    # Verify access
+    try:
+        from BloodApp.models import BloodBank, BloodBankStaff
+        blood_bank = BloodBank.objects.get(user=request.user)
+        if blood_request.blood_bank != blood_bank:
+            return redirect('blood_bank_dashboard')
+    except:
+        return redirect('index')
+    
+    if request.method == 'POST':
+        try:
+            units_approved = int(request.POST.get('units_approved', 0))
+            remarks = request.POST.get('remarks', '')
+            
+            # Validate availability
+            available = blood_bank.inventory.get_available_units(blood_request.blood_type)
+            
+            if units_approved <= 0:
+                return JsonResponse({'success': False, 'error': 'Units must be greater than 0'})
+            
+            if units_approved > available:
+                return JsonResponse({'success': False, 'error': f'Only {available} units available'})
+            
+            # Get staff (current user as staff)
+            try:
+                staff = BloodBankStaff.objects.get(user=request.user)
+            except:
+                staff = None
+            
+            # Approve request
+            blood_request.approve(staff, units_approved, remarks)
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Request approved successfully',
+                'redirect_url': 'blood_bank_dashboard'
+            })
+        except ValueError as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    context = {
+        'blood_request': blood_request,
+        'available_units': blood_bank.inventory.get_available_units(blood_request.blood_type)
+    }
+    
+    return render(request, 'approve_blood_request.html', context)
+
+
+@login_required
+def fulfill_blood_request(request, request_id):
+    """Blood bank fulfills a request (releases blood)"""
+    blood_request = get_object_or_404(BloodRequest, id=request_id)
+    
+    # Verify access and status
+    try:
+        from BloodApp.models import BloodBank
+        blood_bank = BloodBank.objects.get(user=request.user)
+        if blood_request.blood_bank != blood_bank:
+            return redirect('blood_bank_dashboard')
+    except:
+        return redirect('index')
+    
+    if blood_request.status != 'approved':
+        return JsonResponse({'success': False, 'error': 'Request must be approved first'})
+    
+    if request.method == 'POST':
+        try:
+            units_given = int(request.POST.get('units_given', 0))
+            
+            # Validate
+            if units_given <= 0:
+                return JsonResponse({'success': False, 'error': 'Units must be greater than 0'})
+            
+            if units_given > blood_request.units_approved:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Cannot exceed approved units ({blood_request.units_approved})'
+                })
+            
+            # Fulfill request
+            blood_request.fulfill(units_given)
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Request fulfilled successfully',
+                'redirect_url': 'blood_bank_dashboard'
+            })
+        except ValueError as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    context = {
+        'blood_request': blood_request,
+        'units_approved': blood_request.units_approved
+    }
+    
+    return render(request, 'fulfill_blood_request.html', context)
+
+
+@login_required
+def reject_blood_request(request, request_id):
+    """Blood bank rejects a request"""
+    blood_request = get_object_or_404(BloodRequest, id=request_id)
+    
+    # Verify access
+    try:
+        from BloodApp.models import BloodBank
+        blood_bank = BloodBank.objects.get(user=request.user)
+        if blood_request.blood_bank != blood_bank:
+            return redirect('blood_bank_dashboard')
+    except:
+        return redirect('index')
+    
+    if request.method == 'POST':
+        try:
+            reason = request.POST.get('rejection_reason', 'Not specified')
+            
+            if not reason or reason == 'Not specified':
+                return JsonResponse({'success': False, 'error': 'Please provide a rejection reason'})
+            
+            blood_request.reject(reason)
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Request rejected',
+                'redirect_url': 'blood_bank_dashboard'
+            })
+        except ValueError as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return render(request, 'reject_blood_request.html', {'blood_request': blood_request})
+
+
+@login_required
+def get_blood_requests_json(request):
+    """AJAX endpoint to get blood requests (real-time)"""
+    try:
+        from BloodApp.models import BloodBank
+        blood_bank = BloodBank.objects.get(user=request.user)
+    except:
+        return JsonResponse({'error': 'Blood bank not found'}, status=403)
+    
+    status = request.GET.get('status', 'pending')
+    
+    if status == 'all':
+        requests_list = BloodRequest.objects.filter(blood_bank=blood_bank)
+    else:
+        requests_list = BloodRequest.objects.filter(
+            blood_bank=blood_bank,
+            status=status
+        )
+    
+    requests_data = list(requests_list.values(
+        'id', 'hospital__name', 'blood_type', 'units_required', 
+        'urgency_level', 'created_at', 'status'
+    ))
+    
+    return JsonResponse({'requests': requests_data})
+
+
+# ============================================
+# HOSPITAL VIEWS
+# ============================================
+
+@login_required
+def request_blood(request):
+    """Hospital creates a blood request"""
+    try:
+        from BloodApp.models import Hospital, BloodBank
+        hospital = Hospital.objects.get(user=request.user)
+    except:
+        return redirect('index')
+    
+    if request.method == 'POST':
+        try:
+            blood_bank_id = request.POST.get('blood_bank_id')
+            blood_type = request.POST.get('blood_type')
+            units_required = int(request.POST.get('units_required'))
+            urgency = request.POST.get('urgency_level', 'medium')
+            
+            # Validate
+            if not blood_bank_id or not blood_type or units_required <= 0:
+                return JsonResponse({'success': False, 'error': 'Invalid input'})
+            
+            from BloodApp.models import BloodBank
+            blood_bank = get_object_or_404(BloodBank, id=blood_bank_id)
+            
+            # Create request
+            blood_req = BloodRequest.objects.create(
+                hospital=hospital,
+                blood_bank=blood_bank,
+                blood_type=blood_type,
+                units_required=units_required,
+                urgency_level=urgency
+            )
+            
+            # Create notification
+            BloodRequestNotification.objects.create(
+                request=blood_req,
+                notification_type='created',
+                message=f"New blood request: {blood_type} ({units_required} units) - Urgency: {urgency}"
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'request_id': blood_req.id,
+                'message': 'Blood request created successfully'
+            })
+        except ValueError:
+            return JsonResponse({'success': False, 'error': 'Invalid units value'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    # Get nearby blood banks
+    from BloodApp.models import BloodBank
+    blood_banks = BloodBank.objects.all()
+    
+    context = {
+        'blood_banks': blood_banks,
+        'hospital': hospital
+    }
+    
+    return render(request, 'request_blood.html', context)
+
+
+@login_required
+def hospital_blood_requests(request):
+    """Hospital view their blood requests"""
+    try:
+        from BloodApp.models import Hospital
+        hospital = Hospital.objects.get(user=request.user)
+    except:
+        return redirect('index')
+    
+    # Get all requests with notifications
+    blood_requests = BloodRequest.objects.filter(
+        hospital=hospital
+    ).prefetch_related('notifications').order_by('-created_at')
+    
+    # Count by status
+    status_counts = {
+        'pending': blood_requests.filter(status='pending').count(),
+        'approved': blood_requests.filter(status='approved').count(),
+        'fulfilled': blood_requests.filter(status='fulfilled').count(),
+        'rejected': blood_requests.filter(status='rejected').count(),
+    }
+    
+    context = {
+        'hospital': hospital,
+        'blood_requests': blood_requests,
+        'status_counts': status_counts
+    }
+    
+    return render(request, 'hospital_blood_requests.html', context)
+
+
+@login_required
+def hospital_view_request(request, request_id):
+    """Hospital view a specific blood request"""
+    blood_request = get_object_or_404(BloodRequest, id=request_id)
+    
+    # Verify hospital access
+    try:
+        from BloodApp.models import Hospital
+        hospital = Hospital.objects.get(user=request.user)
+        if blood_request.hospital != hospital:
+            return redirect('hospital_blood_requests')
+    except:
+        return redirect('index')
+    
+    # Mark notifications as read
+    BloodRequestNotification.objects.filter(
+        request=blood_request,
+        is_read=False
+    ).update(is_read=True)
+    
+    context = {
+        'blood_request': blood_request,
+        'blood_bank': blood_request.blood_bank,
+    }
+    
+    return render(request, 'hospital_view_request.html', context)
+
+
+
+# ============================================
+# USER MODELS
+# ============================================

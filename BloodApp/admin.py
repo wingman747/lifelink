@@ -3,124 +3,236 @@ from django.utils.html import format_html
 from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q
-from .models import HospitalBloodBankVerification, InstitutionUser
 from django.contrib.auth.models import User
+from .models import BloodRequest, BloodRequestNotification, BloodInventory
 
+# ============================================
+# BLOOD REQUEST ADMIN
+# ============================================
 
-@admin.register(HospitalBloodBankVerification)
-class InstitutionVerificationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'institution_type', 'registration_number', 'email', 'verification_status', 'created_at')
-    list_filter = ('is_verified', 'institution_type', 'created_at')
-    search_fields = ('name', 'registration_number', 'email', 'phone')
-    readonly_fields = ('created_at', 'verified_on')
+@admin.register(BloodRequest)
+class BloodRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'hospital_name', 'blood_bank_name', 'blood_type', 'units_required', 'status_badge', 'urgency_badge', 'created_at')
+    list_filter = ('status', 'urgency_level', 'blood_type', 'created_at')
+    search_fields = ('hospital__name', 'blood_bank__name', 'blood_type')
+    readonly_fields = ('created_at', 'updated_at', 'approved_at', 'fulfilled_at')
     
     fieldsets = (
-        ('Basic Information', {
-            'fields': ('name', 'institution_type', 'registration_number')
+        ('Request Information', {
+            'fields': ('hospital', 'blood_bank', 'blood_type', 'units_required')
         }),
-        ('Contact Details', {
-            'fields': ('address', 'phone', 'email')
+        ('Status & Urgency', {
+            'fields': ('status', 'urgency_level')
         }),
-        ('Verification Details', {
-            'fields': ('is_verified', 'verified_by', 'verified_on', 'reason_for_rejection'),
-            'description': 'Check "is_verified" to approve this institution for registration'
+        ('Approval Details', {
+            'fields': ('approved_by', 'units_approved', 'approved_at', 'remarks')
         }),
-        ('Documents', {
-            'fields': ('license_document',),
+        ('Fulfillment Details', {
+            'fields': ('units_fulfilled', 'fulfilled_at')
+        }),
+        ('Rejection Details', {
+            'fields': ('rejection_reason',)
         }),
         ('Timestamps', {
-            'fields': ('created_at',),
+            'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         })
     )
     
-    def verification_status(self, obj):
-        if obj.is_verified:
-            return format_html('<span style="color: green; font-weight: bold;">✓ Verified</span>')
-        return format_html('<span style="color: red; font-weight: bold;">✗ Pending Review</span>')
-    verification_status.short_description = 'Verification Status'
+    def hospital_name(self, obj):
+        return obj.hospital.name
+    hospital_name.short_description = 'Hospital'
     
-    def save_model(self, request, obj, form, change):
-        # Auto-fill verified_by and verified_on when approving
-        if form.cleaned_data.get('is_verified') and not obj.verified_by:
-            obj.verified_by = request.user.username
-            obj.verified_on = timezone.now()
-        # Clear verification details if rejecting
-        elif not form.cleaned_data.get('is_verified'):
-            obj.verified_by = ''
-            obj.verified_on = None
-        super().save_model(request, obj, form, change)
+    def blood_bank_name(self, obj):
+        return obj.blood_bank.name
+    blood_bank_name.short_description = 'Blood Bank'
     
-    actions = ['approve_institutions', 'reject_institutions']
+    def status_badge(self, obj):
+        colors = {
+            'pending': '#f59e0b',
+            'approved': '#3b82f6',
+            'fulfilled': '#16a34a',
+            'rejected': '#dc2626',
+            'cancelled': '#6b7280'
+        }
+        color = colors.get(obj.status, '#gray')
+        return format_html(
+            '<span style="background: {}; color: white; padding: 4px 12px; border-radius: 4px; font-weight: 600;">{}</span>',
+            color,
+            obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
     
-    def approve_institutions(self, request, queryset):
-        """Bulk approve institutions"""
-        count = 0
-        for obj in queryset:
-            if not obj.is_verified:
-                obj.is_verified = True
-                obj.verified_by = request.user.username
-                obj.verified_on = timezone.now()
-                obj.save()
-                count += 1
-        self.message_user(request, f'{count} institution(s) approved successfully.')
-    approve_institutions.short_description = "Approve selected institutions"
+    def urgency_badge(self, obj):
+        colors = {
+            'low': '#3b82f6',
+            'medium': '#f59e0b',
+            'high': '#dc2626'
+        }
+        color = colors.get(obj.urgency_level, '#gray')
+        icons = {
+            'low': 'ℹ️',
+            'medium': '⚠️',
+            'high': '🚨'
+        }
+        icon = icons.get(obj.urgency_level, '')
+        return format_html(
+            '<span style="background: {}; color: white; padding: 4px 12px; border-radius: 4px; font-weight: 600;">{} {}</span>',
+            color,
+            icon,
+            obj.get_urgency_level_display()
+        )
+    urgency_badge.short_description = 'Urgency'
     
-    def reject_institutions(self, request, queryset):
-        """Bulk reject institutions"""
-        count = queryset.update(is_verified=False, verified_by='', verified_on=None)
-        self.message_user(request, f'{count} institution(s) rejected.')
-    reject_institutions.short_description = "Reject selected institutions"
+    actions = ['approve_requests', 'fulfill_requests', 'reject_requests']
+    
+    def approve_requests(self, request, queryset):
+        """Bulk approve requests"""
+        count = queryset.filter(status='pending').update(
+            status='approved',
+            approved_by=request.user,
+            approved_at=timezone.now()
+        )
+        self.message_user(request, f'{count} request(s) approved.')
+    approve_requests.short_description = "Approve selected requests"
+    
+    def fulfill_requests(self, request, queryset):
+        """Bulk mark as fulfilled"""
+        count = queryset.filter(status='approved').update(
+            status='fulfilled',
+            fulfilled_at=timezone.now()
+        )
+        self.message_user(request, f'{count} request(s) fulfilled.')
+    fulfill_requests.short_description = "Mark as fulfilled"
+    
+    def reject_requests(self, request, queryset):
+        """Bulk reject requests"""
+        count = queryset.filter(status='pending').update(status='rejected')
+        self.message_user(request, f'{count} request(s) rejected.')
+    reject_requests.short_description = "Reject selected requests"
 
 
-@admin.register(InstitutionUser)
-class InstitutionUserAdmin(admin.ModelAdmin):
-    list_display = ('get_username', 'get_institution', 'designation', 'activity_status', 'created_at')
-    list_filter = ('is_active', 'institution__is_verified', 'created_at')
-    search_fields = ('username__username', 'username__email', 'institution__name')
-    readonly_fields = ('created_at', 'get_institution_verification_status')
+# ============================================
+# BLOOD REQUEST NOTIFICATION ADMIN
+# ============================================
+
+@admin.register(BloodRequestNotification)
+class BloodRequestNotificationAdmin(admin.ModelAdmin):
+    list_display = ('request', 'notification_type_badge', 'is_read_badge', 'created_at')
+    list_filter = ('notification_type', 'is_read', 'created_at')
+    search_fields = ('request__hospital__name', 'message')
+    readonly_fields = ('created_at', 'request', 'message')
     
     fieldsets = (
-        ('User Information', {
-            'fields': ('username', 'designation', 'created_at')
+        ('Notification Details', {
+            'fields': ('request', 'notification_type', 'message')
         }),
-        ('Institution', {
-            'fields': ('institution', 'get_institution_verification_status')
+        ('Status', {
+            'fields': ('is_read',)
         }),
-        ('Account Status', {
-            'fields': ('is_active',),
-            'description': 'Uncheck to deactivate this user account'
+        ('Timestamp', {
+            'fields': ('created_at',)
         })
     )
     
-    def get_username(self, obj):
-        return obj.username.username
-    get_username.short_description = 'Username'
+    def notification_type_badge(self, obj):
+        colors = {
+            'created': '#3b82f6',
+            'approved': '#16a34a',
+            'fulfilled': '#10b981',
+            'rejected': '#dc2626',
+            'cancelled': '#6b7280'
+        }
+        color = colors.get(obj.notification_type, '#gray')
+        return format_html(
+            '<span style="background: {}; color: white; padding: 4px 12px; border-radius: 4px; font-weight: 600;">{}</span>',
+            color,
+            obj.get_notification_type_display()
+        )
+    notification_type_badge.short_description = 'Type'
     
-    def get_institution(self, obj):
-        return obj.institution.name
-    get_institution.short_description = 'Institution'
+    def is_read_badge(self, obj):
+        if obj.is_read:
+            return format_html('<span style="color: green;">✓ Read</span>')
+        return format_html('<span style="color: orange;">📬 Unread</span>')
+    is_read_badge.short_description = 'Read Status'
     
-    def activity_status(self, obj):
-        if obj.is_active:
-            return format_html('<span style="color: green;">🟢 Active</span>')
-        return format_html('<span style="color: red;">🔴 Inactive</span>')
-    activity_status.short_description = 'Status'
+    actions = ['mark_as_read', 'mark_as_unread']
     
-    def get_institution_verification_status(self, obj):
-        if obj.institution.is_verified:
-            return format_html('<span style="color: green;">✓ Verified</span>')
-        return format_html('<span style="color: orange;">⚠ Not Verified</span>')
-    get_institution_verification_status.short_description = 'Institution Verification Status'
+    def mark_as_read(self, request, queryset):
+        count = queryset.update(is_read=True)
+        self.message_user(request, f'{count} notification(s) marked as read.')
+    mark_as_read.short_description = "Mark as read"
     
-    actions = ['deactivate_users', 'activate_users']
+    def mark_as_unread(self, request, queryset):
+        count = queryset.update(is_read=False)
+        self.message_user(request, f'{count} notification(s) marked as unread.')
+    mark_as_unread.short_description = "Mark as unread"
+
+
+# ============================================
+# BLOOD INVENTORY ADMIN
+# ============================================
+
+@admin.register(BloodInventory)
+class BloodInventoryAdmin(admin.ModelAdmin):
+    list_display = ('blood_bank_name', 'total_units', 'o_positive_units', 'a_positive_units', 'b_positive_units', 'ab_positive_units', 'last_updated')
+    readonly_fields = ('blood_bank', 'last_updated', 'get_inventory_summary')
     
-    def deactivate_users(self, request, queryset):
-        count = queryset.update(is_active=False)
-        self.message_user(request, f'{count} user(s) deactivated.')
-    deactivate_users.short_description = "Deactivate selected users"
+    fieldsets = (
+        ('Blood Bank', {
+            'fields': ('blood_bank', 'last_updated')
+        }),
+        ('Positive Blood Types', {
+            'fields': ('O_positive', 'A_positive', 'B_positive', 'AB_positive')
+        }),
+        ('Negative Blood Types', {
+            'fields': ('O_negative', 'A_negative', 'B_negative', 'AB_negative')
+        }),
+        ('Summary', {
+            'fields': ('get_inventory_summary',)
+        })
+    )
     
-    def activate_users(self, request, queryset):
-        count = queryset.update(is_active=True)
-        self.message_user(request, f'{count} user(s) activated.')
-    activate_users.short_description = "Activate selected users"
+    def blood_bank_name(self, obj):
+        return obj.blood_bank.name
+    blood_bank_name.short_description = 'Blood Bank'
+    
+    def total_units(self, obj):
+        total = (obj.O_positive + obj.O_negative + obj.A_positive + obj.A_negative + 
+                obj.B_positive + obj.B_negative + obj.AB_positive + obj.AB_negative)
+        return format_html(
+            '<span style="background: #dc2626; color: white; padding: 4px 12px; border-radius: 4px; font-weight: 600;">{} Units</span>',
+            total
+        )
+    total_units.short_description = 'Total Units'
+    
+    def o_positive_units(self, obj):
+        return obj.O_positive
+    o_positive_units.short_description = 'O+'
+    
+    def a_positive_units(self, obj):
+        return obj.A_positive
+    a_positive_units.short_description = 'A+'
+    
+    def b_positive_units(self, obj):
+        return obj.B_positive
+    b_positive_units.short_description = 'B+'
+    
+    def ab_positive_units(self, obj):
+        return obj.AB_positive
+    ab_positive_units.short_description = 'AB+'
+    
+    def get_inventory_summary(self, obj):
+        inventory = obj.get_inventory_dict()
+        html = '<table style="border-collapse: collapse; width: 100%;">'
+        html += '<tr style="background: #f5f5f5;">'
+        for blood_type in inventory.keys():
+            html += f'<th style="border: 1px solid #ddd; padding: 8px; text-align: center; font-weight: 600;">{blood_type}</th>'
+        html += '</tr><tr>'
+        for blood_type, quantity in inventory.items():
+            color = '#16a34a' if quantity > 5 else '#f59e0b' if quantity > 0 else '#dc2626'
+            html += f'<td style="border: 1px solid #ddd; padding: 8px; text-align: center; color: {color}; font-weight: 600;">{quantity}</td>'
+        html += '</tr></table>'
+        return format_html(html)
+    get_inventory_summary.short_description = 'Current Inventory Summary'
